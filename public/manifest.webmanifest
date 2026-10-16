@@ -1,0 +1,16 @@
+{
+  "name": "PmotionIA",
+  "short_name": "PmotionIA",
+  "description": "Panel de Pau: lo que hace Claude, órdenes, leads y tareas.",
+  "lang": "es",
+  "start_url": "/?app=1",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#eef1f6",
+  "theme_color": "#2a52ff",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

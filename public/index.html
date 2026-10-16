@@ -1,0 +1,104 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>PmotionIA</title><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#2a52ff"><link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Manrope:wght@400;600;700&display=swap">
+<style>
+/* Layout: cabecera con estado + 4 pestañas inferiores (Actividad, Órdenes, Leads, Tareas); Actividad es el feed en vivo que escribo yo */
+:root{--bg:#eef1f6;--card:#ffffff;--ink:#16202e;--muted:#68768a;--line:#d9e0ea;--brand:#2a52ff;--brand-ink:#fff;--coral:#ff6a4d;--ok:#1f9d63;--warn:#c98a00;
+--fd:'Bricolage Grotesque',system-ui,sans-serif;--fb:'Manrope',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d121b;--card:#161d2a;--ink:#e8edf6;--muted:#8d9bb0;--line:#263042;--brand:#6f8bff;--brand-ink:#0b1020;--coral:#ff8a70;--ok:#44c98a;--warn:#e8b53a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d121b;--card:#161d2a;--ink:#e8edf6;--muted:#8d9bb0;--line:#263042;--brand:#6f8bff;--brand-ink:#0b1020;--coral:#ff8a70;--ok:#44c98a;--warn:#e8b53a;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px;line-height:1.45;padding-inline:16px;display:flex;flex-direction:column}
+.w{width:100%;max-width:640px;margin:0 auto;display:flex;flex-direction:column;min-height:0;flex:1}
+header{padding-block:14px 8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+h1{font-family:var(--fd);font-size:1.5rem;margin:0;letter-spacing:-.01em}
+h1 b{color:var(--brand)}
+.est{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ok)}
+main{flex:1;overflow-y:auto;min-height:0;padding-bottom:12px}
+section{display:none;flex-direction:column;gap:10px}
+section.on{display:flex}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.it{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px}
+.ic{width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--brand)}
+.ic.ok{background:var(--ok)}.ic.aviso{background:var(--warn)}.ic.envio{background:var(--coral)}
+.t{margin:0;overflow-wrap:anywhere}
+.ts{font-size:.74rem;color:var(--muted)}
+.vacio{color:var(--muted);text-align:center;padding:22px 10px;border:1px dashed var(--line);border-radius:14px}
+textarea{width:100%;min-height:92px;resize:vertical;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px}
+textarea:focus-visible,button:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;font-weight:700;min-height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;cursor:pointer}
+button.p{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+button.q{font-size:.85rem}
+.pill{font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:99px;padding:2px 8px;border:1.5px solid var(--muted);color:var(--muted);white-space:nowrap}
+.pill.pend{border-color:var(--warn);color:var(--warn)}.pill.hecha{border-color:var(--ok);color:var(--ok)}
+.pill.si{border-color:var(--ok);color:var(--ok)}.pill.seg{border-color:var(--coral);color:var(--coral)}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.n{font-weight:700;margin:0}
+.sm{font-size:.85rem;color:var(--muted);margin:2px 0 0;overflow-wrap:anywhere}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding-block:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg)}
+nav button{border:0;background:transparent;color:var(--muted);font-size:.8rem;min-height:48px;border-radius:10px}
+nav button.on{color:var(--brand);background:var(--card)}
+.h2{font-family:var(--fd);font-size:1.05rem;margin:8px 0 0}
+#pin{position:fixed;inset:0;background:var(--bg);display:none;place-items:center;padding:16px;z-index:9}#pin.on{display:grid}#pin .card{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px}#pin input{font:inherit;font-size:1.4rem;letter-spacing:.3em;text-align:center;padding:10px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink)}#bell{font-size:.8rem;min-height:36px;padding:4px 10px}</style>
+<div class="w">
+<header><h1>Pmotion<b>IA</b></h1><div class="est"><button id="bell" hidden>🔔 Avisos</button><span class="dot"></span><span id="est">Conectando…</span></div></header>
+<div id="pin"><div class="card"><h1>Pmotion<b>IA</b></h1><p class="sm">Introduce tu PIN.</p><input id="pinin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="······"><button class="p" id="pinok">Entrar</button><p class="sm" id="pinerr"></p></div></div><main>
+<section id="s-act" class="on"><div id="l-act"></div></section>
+<section id="s-ord">
+<div class="card"><textarea id="txt" placeholder="Escríbeme lo que quieres que haga o cambie. Con el micrófono del teclado del móvil también puedes dictarlo."></textarea>
+<div class="row" style="margin-top:8px"><button class="p" id="env">Enviar orden</button><button id="mic">🎤 Dictar</button></div>
+<p class="sm" id="micmsg"></p></div>
+<div class="row"><button class="q" data-q="Mira las respuestas de WhatsApp y dime quién ha contestado">Ver respuestas</button><button class="q" data-q="Busca el siguiente lote de 10 leads, comprueba WhatsApp y escribe a los que tengan">Siguiente lote</button><button class="q" data-q="Hazme un resumen de lo que has hecho hoy">Resumen del día</button><button class="q" data-q="Pasa al CRM los interesados de la ruta de Mataró">Interesados al CRM</button></div>
+<div id="l-ord"></div></section>
+<section id="s-lea"><div id="l-lea"></div></section>
+<section id="s-tar"><div id="l-tar"></div></section>
+</main>
+<nav><button data-t="act" class="on">Actividad</button><button data-t="ord">Órdenes</button><button data-t="lea">Leads</button><button data-t="tar">Tareas</button></nav>
+</div>
+<script>
+var PIN="",D={act:[],ord:[],lea:[],tar:[]},GEN="";
+try{PIN=localStorage.getItem("pm_pin")||""}catch(e){}
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML}
+function hora(t){if(!t)return"";var d=new Date(t);return isNaN(d)?"":d.toLocaleString("es-ES",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
+function R(){
+var a=D.act.map(function(x){return'<div class="card it"><span class="ic '+esc(x.tipo||"")+'"></span><div><p class="t">'+esc(x.texto)+'</p><span class="ts">'+hora(x.ts)+'</span></div></div>'}).join("");
+document.getElementById("l-act").innerHTML=a||'<div class="vacio">Aquí aparecerá lo que voy haciendo, en directo.</div>';
+document.getElementById("l-ord").innerHTML='<p class="h2">Tus órdenes</p>'+(D.ord.map(function(x){return'<div class="card"><div class="top"><p class="t">'+esc(x.texto)+'</p><span class="pill '+(x.estado=="hecha"?"hecha":"pend")+'">'+esc(x.estado||"pendiente")+'</span></div><span class="ts">'+hora(x.ts)+'</span>'+(x.respuesta?'<p class="sm">↳ '+esc(x.respuesta)+'</p>':'')+'</div>'}).join("")||'<div class="vacio">Todavía no has enviado ninguna orden.</div>');
+document.getElementById("l-lea").innerHTML=D.lea.map(function(x){var c=x.estado=="interesado"?"si":(x.estado=="seguimiento"?"seg":"");return'<div class="card"><div class="top"><p class="n">'+esc(x.nombre)+'</p><span class="pill '+c+'">'+esc(x.estado||"nuevo")+'</span></div><p class="sm">'+esc(x.tipo||"")+(x.tel?' · '+esc(x.tel):'')+'</p>'+(x.nota?'<p class="sm">'+esc(x.nota)+'</p>':'')+'</div>'}).join("")||'<div class="vacio">Aquí verás quién ha contestado y a quién toca seguimiento.</div>';
+document.getElementById("l-tar").innerHTML=D.tar.map(function(x){return'<div class="card"><div class="top"><p class="n">'+esc(x.titulo)+'</p><span class="pill '+(x.hecha?"hecha":"pend")+'">'+(x.hecha?"hecha":esc(x.fecha||"pendiente"))+'</span></div><p class="sm">'+esc(x.area||"")+'</p></div>'}).join("")||'<div class="vacio">Tareas de clase y plazos del Erasmus.</div>'}
+function api(p,b){return fetch(p,{method:b?"POST":"GET",headers:{"x-pin":PIN,"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined}).then(function(r){if(r.status==401){showPin("PIN incorrecto");throw 0}return r.json()})}
+function apply(s){D={act:s.actividad,ord:s.ordenes,lea:s.leads,tar:s.tareas};
+ try{if(GEN!==s.gen){GEN=s.gen}localStorage.setItem("pm_ord",JSON.stringify({gen:s.gen,o:s.ordenes}))}catch(e){}
+ R();document.getElementById("est").textContent="En directo"}
+function load(){api("/api/state").then(apply).catch(function(){document.getElementById("est").textContent="Sin conexión"})}
+function start(){
+ var local=null;try{local=JSON.parse(localStorage.getItem("pm_ord")||"null")}catch(e){}
+ api("/api/state").then(function(s){
+  if(local&&local.gen!==s.gen&&local.o&&local.o.length){return api("/api/restore",{gen:local.gen,ordenes:local.o})}return s}).then(apply).catch(function(){});
+ setInterval(function(){if(!document.hidden)load()},6000);
+ document.addEventListener("visibilitychange",function(){if(!document.hidden)load()});
+ initPush()}
+function showPin(m){document.getElementById("pin").classList.add("on");document.getElementById("pinerr").textContent=m||""}
+document.getElementById("pinok").onclick=function(){PIN=document.getElementById("pinin").value.trim();fetch("/api/state",{headers:{"x-pin":PIN}}).then(function(r){if(r.ok){try{localStorage.setItem("pm_pin",PIN)}catch(e){}document.getElementById("pin").classList.remove("on");start()}else showPin("PIN incorrecto")})};
+function send(t){t=(t||"").trim();if(!t)return;api("/api/orden",{texto:t}).then(function(s){document.getElementById("txt").value="";apply(s)}).catch(function(){document.getElementById("est").textContent="No se pudo enviar"})}
+document.getElementById("env").onclick=function(){send(document.getElementById("txt").value)};
+document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){send(b.dataset.q)}});
+document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){document.querySelectorAll("nav button").forEach(function(x){x.classList.toggle("on",x==b)});document.querySelectorAll("section").forEach(function(s){s.classList.toggle("on",s.id=="s-"+b.dataset.t)})}});
+document.getElementById("mic").onclick=function(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition,m=document.getElementById("micmsg");
+if(!SR){m.textContent="Este navegador no deja dictar desde la página. Usa el micrófono del teclado del móvil.";return}
+try{var r=new SR();r.lang="es-ES";r.onresult=function(e){var t=document.getElementById("txt");t.value+=(t.value?" ":"")+e.results[0][0].transcript;m.textContent=""};r.onerror=function(){m.textContent="No hay permiso de micrófono. Usa el micrófono del teclado del móvil."};r.start();m.textContent="Escuchando…"}catch(e){m.textContent="No se pudo activar el micrófono. Usa el del teclado del móvil."}};
+/* avisos push */
+function b64u(s){var p="=".repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(b,function(c){return c.charCodeAt(0)})}
+function initPush(){var bell=document.getElementById("bell");
+ if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window))return;
+ navigator.serviceWorker.register("/sw.js",{updateViaCache:"none"}).catch(function(){});
+ bell.hidden=false;
+ function sync(){navigator.serviceWorker.ready.then(function(reg){return reg.pushManager.getSubscription()}).then(function(s){bell.textContent=s&&Notification.permission=="granted"?"🔔 Activados":"🔔 Avisos"})}
+ sync();
+ bell.onclick=function(){Notification.requestPermission().then(function(p){if(p!="granted")return;
+  return fetch("/api/vapid").then(function(r){return r.text()}).then(function(k){return navigator.serviceWorker.ready.then(function(reg){return reg.pushManager.getSubscription().then(function(s){return s||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(k)})})})}).then(function(sub){return api("/api/subscribe",{sub:sub.toJSON(),test:true})}).then(sync)}).catch(function(){})}}
+R();
+if(PIN)start();else showPin("");
+</script>
+</html>
