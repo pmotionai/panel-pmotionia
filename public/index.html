@@ -37,8 +37,7 @@ svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .av.v{background:var(--green)}.av.l{width:72px;height:72px;font-size:24px}.av.s{width:34px;height:34px;font-size:12px}
 
 /* ---------- estructura ---------- */
-#app{display:grid;grid-template-columns:232px minmax(0,1fr) 330px;min-height:100%}
-#app.sin-rail{grid-template-columns:232px minmax(0,1fr)}
+#app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
 aside.nav{border-right:1px solid var(--line);padding:24px 14px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh}
 .marca{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;padding:0 10px 22px}
 .marca .logo{width:30px;height:30px;border-radius:9px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px;position:relative}
@@ -129,7 +128,10 @@ button.e:hover{background:var(--soft)}
 .rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 
 /* ---------- tareas (columna fija) ---------- */
-aside.rail{border-left:1px solid var(--line);padding:30px 22px;position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg)}
+#tarBtn{position:fixed;top:18px;right:clamp(16px,2.4vw,32px);z-index:35;box-shadow:var(--sh)}
+#tarBtn .cnt{font-family:var(--fm);font-size:11px;background:var(--green);color:#fff;border-radius:999px;padding:1px 7px}
+#tarBtn .cnt:empty{display:none}
+aside.rail{position:fixed;top:66px;right:clamp(16px,2.4vw,32px);width:min(380px,calc(100vw - 32px));max-height:min(72vh,640px);overflow-y:auto;background:var(--bg);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh2);padding:20px 20px 16px;z-index:36;transform-origin:top right;animation:pop .3s var(--spring)}
 .rail h2{font-size:18px;font-weight:700;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .tarea{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;padding:10px 0;border-bottom:1px solid var(--line);align-items:start}
 .tarea .chk{width:20px;height:20px;border-radius:50%;border:1.5px solid #cfcfcf;background:none;padding:0;display:grid;place-items:center;transition:all .2s var(--spring);margin-top:1px}
@@ -201,7 +203,7 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
 
 /* ---------- asistente de voz ---------- */
 #voz{position:fixed;right:clamp(16px,2vw,28px);bottom:clamp(16px,2vw,28px);z-index:40;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
-#app:not(.sin-rail)~#voz{right:calc(330px + 20px)}
+
 #vozBtn{width:58px;height:58px;border-radius:50%;border:0;background:var(--ink);color:#fff;display:grid;place-items:center;box-shadow:var(--sh2);transition:transform .25s var(--spring)}
 #vozBtn:hover{transform:scale(1.06)}#vozBtn svg{width:24px;height:24px}
 #vozBtn.oye{background:var(--green);animation:late 1.2s ease-in-out infinite}
@@ -235,12 +237,34 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
 .modo button.on{background:var(--bg);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:all .35s var(--spring);z-index:70}
 #toast.on{opacity:1;transform:translateX(-50%)}
+.redes-k{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:26px}
+.red{border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
+.red h3{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.red .nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.red .nums b{display:block;font-family:var(--fm);font-size:24px;font-weight:600;letter-spacing:-.03em}.red .nums span{font-size:12px;color:var(--mute)}
+.reels{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.reel{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;background:var(--bg);transition:transform .25s var(--spring),box-shadow .25s}
+.reel:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.reel .img{aspect-ratio:3/4;background:var(--soft2) center/cover no-repeat;position:relative}
+.reel .img .top{position:absolute;left:10px;top:10px;background:rgba(10,10,10,.75);color:#fff;font-size:11px;font-weight:600;border-radius:999px;padding:3px 9px}
+.reel .img .top.v{background:var(--green)}
+.reel .b{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.reel .t{font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.reel .f{font-size:12px;color:var(--mute);font-family:var(--fm)}
+.reel .st{display:grid;grid-template-columns:52px minmax(0,1fr);gap:4px 8px;font-size:12px;align-items:center}
+.reel .st .n{font-weight:600;color:var(--ink2)}
+.reel .st .v{font-family:var(--fm);color:var(--ink);display:flex;gap:10px;flex-wrap:wrap}
+.reel .bar{height:4px;border-radius:4px;background:var(--soft2);overflow:hidden;grid-column:1/-1}.reel .bar i{display:block;height:100%;background:var(--ink)}
+.reel .lk{display:flex;gap:6px}
+.correo .it{display:block;padding:9px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.correo .it b{font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.correo .it span{font-size:12px;color:var(--mute);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:860px){.redes-k{grid-template-columns:minmax(0,1fr)}.red .nums{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .feed .it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 .feed .it .s{font-size:12px;color:var(--mute);font-family:var(--fm)}
 .conex{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .conex .card{padding:16px;display:flex;flex-direction:column;gap:6px;box-shadow:none}
 
-@media (max-width:1240px){#app{grid-template-columns:232px minmax(0,1fr)}aside.rail{display:none}aside.rail.mov{display:block}.navb.mtareas{display:flex}#app:not(.sin-rail)~#voz{right:clamp(16px,2vw,28px)}}
+
 @media (max-width:860px){
   #app,#app.sin-rail{grid-template-columns:minmax(0,1fr)}
   aside.nav{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--line);background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:20;justify-content:space-around}
@@ -254,7 +278,7 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
   .dos,.f-body{grid-template-columns:minmax(0,1fr)}
   #voz{bottom:calc(84px + env(safe-area-inset-bottom))}
   #app~#pops{left:16px;bottom:calc(150px + env(safe-area-inset-bottom))}
-  aside.rail.mov{position:static;height:auto;border-left:0;padding:0}
+  #tarBtn{top:12px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}}
 </style>
@@ -277,6 +301,8 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
   <symbol id="i-der" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
   <symbol id="i-ref" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></symbol>
   <symbol id="i-tab" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/></symbol>
+  <symbol id="i-red" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M10 8.5v7l6-3.5z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></symbol>
   <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></symbol>
 </svg>
 <div id="hola" hidden><div class="logo">P</div><div class="l1" id="holaTxt"></div><div class="l2" id="holaSub"></div></div>
@@ -288,6 +314,7 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
     <button class="navb on" data-v="hoy"><svg class="i"><use href="#i-hoy"/></svg>Hoy</button>
     <button class="navb" data-v="clientes"><svg class="i"><use href="#i-cli"/></svg>Clientes<span class="cnt" id="cntCli"></span></button>
     <button class="navb mtareas" data-v="tareas"><svg class="i"><use href="#i-tar"/></svg>Tareas<span class="cnt" id="cntTar"></span></button>
+    <button class="navb" data-v="redes"><svg class="i"><use href="#i-red"/></svg>Redes</button>
     <button class="navb" data-v="actividad"><svg class="i"><use href="#i-act"/></svg>Actividad</button>
     <button class="navb" data-v="ajustes"><svg class="i"><use href="#i-aj"/></svg>Ajustes</button>
     <div class="pie" id="pie"></div>
@@ -306,6 +333,7 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
         <div class="card"><p class="titulo">Agenda <span class="mute sm" id="agendaSub"></span></p><div class="tl" id="agenda"><div class="cargando"><span class="spin"></span>Cargando…</div></div></div>
         <div><p class="titulo">Cola de llamadas <span class="mute sm" id="colaSub"></span></p><div class="mini-cards" id="cola"><div class="cargando"><span class="spin"></span>Cargando…</div></div></div>
       </div>
+      <div id="bloqueCorreo" class="card correo" style="margin-top:24px" hidden><p class="titulo">Correo sin leer <span class="mute sm" id="correoSub"></span></p><div id="correo"></div></div>
       <div id="bloqueContenido" style="margin-top:28px" hidden><p class="titulo">Contenido programado <span class="mute sm">Metricool</span></p><div class="tl card" id="contenido"></div></div>
     </section>
 
@@ -318,7 +346,13 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
       <div id="tarjetas" class="rejilla" hidden></div>
     </section>
 
-    <!-- TAREAS (solo en pantallas sin columna) -->
+    <!-- REDES -->
+    <section class="v" id="v-redes">
+      <div class="cab"><div><p class="kick" id="redesSub">Instagram y TikTok · últimos 30 días</p><h1>Redes sociales</h1></div><button class="btn sm" id="redesRef"><svg class="i"><use href="#i-ref"/></svg>Actualizar</button></div>
+      <div id="redes"><div class="cargando"><span class="spin"></span>Cargando…</div></div>
+    </section>
+
+    <!-- TAREAS (móvil) -->
     <section class="v" id="v-tareas"><div class="cab"><div><h1>Tareas</h1></div></div><div id="tareasMov"></div></section>
 
     <!-- ACTIVIDAD -->
@@ -340,7 +374,8 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
     </section>
   </main>
 
-  <aside class="rail" id="rail">
+  <button class="btn" id="tarBtn" aria-expanded="false"><svg class="i"><use href="#i-tar"/></svg>Tareas de hoy <span class="cnt" id="tarCnt"></span></button>
+  <aside class="rail" id="rail" hidden>
     <h2>Tareas <button class="btn ic sm" id="tarRef" title="Actualizar"><svg class="i"><use href="#i-ref"/></svg></button></h2>
     <div id="tareas"><div class="cargando"><span class="spin"></span>Cargando…</div></div>
     <div class="nueva"><input class="in" id="tarNueva" placeholder="Nueva tarea · p. ej. «llamar a Oikos mañana 10:00»"><button class="btn k" id="tarAdd">Añadir</button></div>
@@ -485,7 +520,7 @@ function pintarTareas(){
   var html=(CONEX.todoist?"":'<p class="sm mute" style="margin:0 0 6px">Todoist sin conectar: aquí verás tus tareas en cuanto lo conectes. Mientras, salen las del panel.</p>')
     +'<p class="grupo">Hoy</p>'+(hoy.map(fila).join("")||'<p class="vacio">Nada para hoy.</p>')+'<p class="grupo">Próximos días</p>'+(prox.slice(0,25).map(fila).join("")||'<p class="vacio">Sin tareas próximas.</p>');
   $("#tareas").innerHTML=html;$("#tareasMov").innerHTML=html;
-  $("#cntTar").textContent=hoy.length||"";
+  $("#cntTar").textContent=hoy.length||"";$("#tarCnt").textContent=hoy.length||"";
 }
 function cargarTareas(){return Promise.all([api("/api/crm/tareas").then(function(d){TODO=d.tareas||[];CONEX.todoist=d.conectado}).catch(function(){TODO=[]}),api("/api/state").then(function(s){FEED={act:s.actividad||[],ord:s.ordenes||[],tar:s.tareas||[]};pintarFeed()}).catch(function(){})]).then(function(){pintarTareas();if(HOY)pintarHoy()})}
 document.addEventListener("click",function(e){var c=e.target.closest(".tarea .chk");if(!c)return;var row=c.closest(".tarea"),id=row.dataset.tarea,src=row.dataset.src;row.classList.add("ok");
@@ -595,9 +630,18 @@ $("#fRes").onclick=function(e){var b=e.target.closest("[data-r]");if(!b)return;v
   $("#fForm").innerHTML='<div class="mini">'+(n=="fecha"?'<input class="in" type="date" id="rF" value="'+manana()+'" style="flex:0 1 160px"><input class="in" type="time" id="rH" value="10:00" style="flex:0 1 120px">':'')+'<input class="in" id="rT" placeholder="'+(n=="nota"?"¿Qué te dijo? ¿Qué le enviaste?":"Nota (opcional)")+'"><button class="btn g sm" id="rOk">Guardar</button></div>';
   $("#rOk").onclick=function(){guardar(r,[$("#rF")&&$("#rF").value,$("#rH")&&$("#rH").value,$("#rT").value.trim()].filter(Boolean).join(" "))};
   $("#rT").onkeydown=function(ev){if(ev.key=="Enter")$("#rOk").click()};$("#rT").focus()};
-function guardar(r,detalle){var id=SEL,i=ORDEN_FICHA.indexOf(id),sig=ORDEN_FICHA[i+1],l=LEADS.find(function(x){return x.ID==id});
-  $("#fRes").querySelectorAll("button").forEach(function(b){b.disabled=true});
-  api("/api/crm/resultado",{id:id,resultado:r,detalle:detalle}).then(function(){toast("Guardado en el CRM");tras(r,l);return cargar(true)}).then(function(){if(sig)abrir(sig);else cerrarFicha()}).catch(function(e){toast(e.message);pintarRes()})}
+/* Guardado optimista: la ficha pasa al siguiente al momento y el CRM se actualiza en segundo plano */
+var ESTADO_RES={"no-contesta":"VOLVER A LLAMAR","no-interesa":"NO INTERESADO",volver:"CON FECHA",reunion:"REUNIÓN",interesado:"INTERESADO",seguimiento:"SEGUIMIENTO",descartar:"DESCARTADO"};
+var NOTA_RES={"no-contesta":"no contesta","no-interesa":"no le interesa",volver:"volver a llamar",reunion:"demo agendada",interesado:"interesado",seguimiento:"seguimiento",descartar:"descartado"};
+var ACC_RES={volver:"Llamar ",reunion:"Demo ",seguimiento:"Seguimiento "};
+var refrescoT=null;
+function guardar(r,detalle){var id=SEL,i=ORDEN_FICHA.indexOf(id),sig=ORDEN_FICHA[i+1],l=LEADS.find(function(x){return x.ID==id});if(!l)return;
+  var antes=Object.assign({},l);
+  l.Estado=ESTADO_RES[r];l.Notas=(l.Notas?l.Notas+" · ":"")+HOY+": "+NOTA_RES[r]+(detalle?": "+detalle:"");if(ACC_RES[r]){l["Próxima acción"]=ACC_RES[r]+detalle;var m=String(detalle).match(/\d{4}-\d{2}-\d{2}/);l["Fecha próxima acción"]=m?m[0]:""}l.Actualizado=HOY;
+  ORDEN_FICHA=ORDEN_FICHA.filter(function(x){return x!=id||!/descartar|no-interesa/.test(r)});
+  pintarTodo();if(sig)abrir(sig);else cerrarFicha();tras(r,l);
+  api("/api/crm/resultado",{id:id,resultado:r,detalle:detalle}).then(function(){toast(l.Negocio+" · guardado");clearTimeout(refrescoT);refrescoT=setTimeout(function(){cargar(true)},8000)})
+   .catch(function(e){Object.assign(l,antes);pintarTodo();toast("No se guardó "+l.Negocio+": "+e.message)})}
 $("#fNotaOk").onclick=function(){var t=$("#fNota").value.trim();if(!t)return;var id=SEL;api("/api/crm/nota",{id:id,texto:t}).then(function(){toast("Nota guardada");return cargar(true)}).then(function(){if(SEL==id)abrir(id)}).catch(function(e){toast(e.message)})};
 
 /* ---------- navegación ---------- */
@@ -618,8 +662,8 @@ function pintarFeed(){var h=function(t){var d=new Date(t);return isNaN(d)?"":d.t
 $("#envOrden").onclick=function(){var t=$("#txtOrden").value.trim();if(!t)return;api("/api/orden",{texto:t}).then(function(s){$("#txtOrden").value="";FEED.act=s.actividad;FEED.ord=s.ordenes;pintarFeed();toast("Orden enviada")}).catch(function(e){toast(e.message)})};
 
 /* ---------- ajustes ---------- */
-function pintarConex(){var N=[["hoja","Hoja de Google","Leads, estados y notas del CRM"],["guion","Guion de llamada","Base de los guiones de cada negocio"],["calendar","Google Calendar","Agenda del día (dirección secreta iCal)"],["todoist","Todoist","Tareas siempre a la vista"],["metricool","Metricool","Contenido programado"],["voz","Asistente de voz","Voz y micrófono de Chrome"]];
-  CONEX.voz="speechSynthesis" in window;
+function pintarConex(){var N=[["hoja","Hoja de Google","Leads, estados y notas del CRM"],["guion","Guion de llamada","Base de los guiones de cada negocio"],["calendar","Google Calendar","Agenda del día, por tu cuenta de Google"],["correo","Gmail","Correo sin leer en Hoy y en el asistente"],["redes","Redes sociales","Estadísticas de Metricool guardadas en el CRM"],["todoist","Todoist","Tareas siempre a la vista"],["metricool","Metricool","Contenido programado"],["voz","Asistente de voz","Voz y micrófono de Chrome"]];
+  CONEX.voz="speechSynthesis" in window;CONEX.redes=!!(REDES&&REDES.datos);
   $("#conex").innerHTML=N.map(function(n){var on=CONEX[n[0]];return'<div class="card"><span class="chip'+(on?" v":"")+'" style="align-self:flex-start"><span class="dot'+(on?" v":"")+'"></span>'+(on?"Conectado":"Sin conectar")+'</span><b style="margin-top:6px">'+n[1]+'</b><span class="sm mute">'+n[2]+'</span></div>'}).join("");
   var k=N.filter(function(n){return CONEX[n[0]]}).length;$("#pie").innerHTML='<span class="dot v"></span>'+k+' de '+N.length+' conectados'}
 $("#salir").onclick=function(){try{localStorage.removeItem("pm_pin")}catch(e){}location.reload()};
@@ -676,6 +720,7 @@ function resumenDia(){
   if(tt.length)f.push("Tareas para hoy: "+lista(tt.slice(0,3).map(function(t){return t.texto}))+(tt.length>3?", y "+(tt.length-3)+" más":"")+".");
   var frios=LEADS.filter(function(l){return l.Estado=="INTERESADO"&&l.Actualizado&&(new Date(HOY)-new Date(String(l.Actualizado).slice(0,10)))/864e5>=4});
   if(frios.length)f.push(lista(frios.slice(0,2).map(function(l){return l.Negocio}))+(frios.length==1?" está interesado":" están interesados")+" y no los tocas desde hace días.");
+  if(CORREOS.length)f.push("Tienes "+CORREOS.length+" correo"+(CORREOS.length==1?"":"s")+" sin leer"+(CORREOS.length?", el último de "+String(CORREOS[0].de).replace(/<.*>/,"").trim()+": "+CORREOS[0].asunto:"")+".");
   var hoyPosts=POSTS.filter(function(x){return String(x.fecha).slice(0,10)==HOY});
   if(hoyPosts.length)f.push("Hoy se publica"+(hoyPosts.length==1?" un reel":"n "+hoyPosts.length+" publicaciones")+" en redes.");
   return f.join(" ");
@@ -690,7 +735,9 @@ function responder(q){var n=norm(q),m;
   if(/tarea/.test(n)){var t=tareasHoy();return di(t.length?"Para hoy tienes: "+lista(t.slice(0,5).map(function(x){return x.texto}))+".":"No tienes tareas para hoy.")}
   if(/guion|que le digo|como empiezo/.test(n)){var x=LEADS.find(function(z){return z.ID==SEL});if(!x)return di("Abre primero la ficha de un negocio y te leo cómo empezar.");return di("Empieza así: Buenos días, ¿hablo con "+x.Negocio+"? Soy Pau, de PmotionIA, de Mataró. Te llamo por una cosa concreta, te robo un minuto. Y después: "+ganchoCorto(x).replace(/[«»]/g,""))}
   if(/agenda|citas|calendario/.test(n)){var cal=AGENDA.filter(function(e){return e.inicio.slice(0,10)==HOY});return di(cal.length?"Hoy tienes "+lista(cal.map(function(e){return e.titulo+(e.todoElDia?"":" a las "+e.inicio.slice(11,16))}))+".":CONEX.calendar?"No tienes nada en el calendario hoy.":"Aún no tengo tu Google Calendar conectado.")}
-  if(/correo|email|mail|classroom|clase/.test(n))return di("Todavía no puedo leer tu correo ni Classroom. Es la siguiente fase: te lo explico en Ajustes cuando lo conectemos.");
+  if(/correo|email|mail/.test(n))return di(CONEX.correo?(CORREOS.length?"Tienes "+CORREOS.length+" sin leer: "+lista(CORREOS.slice(0,3).map(function(c){return c.asunto+" de "+String(c.de).replace(/<.*>/,"").trim()}))+".":"No tienes correos sin leer."):"Todavía no tengo acceso a tu correo.");
+  if(/redes|reel|tiktok|instagram|visualizaciones/.test(n)){var dd=REDES&&REDES.datos;if(!dd)return di("Aún no tengo estadísticas de redes guardadas.");var m=dd.reels.slice().sort(function(a,b){return((b.ig?b.ig.vis:0)+(b.tt?b.tt.vis:0))-((a.ig?a.ig.vis:0)+(a.tt?a.tt.vis:0))})[0];return di("En los últimos 30 días: "+fmt(dd.cuentas.tiktok.vis)+" visualizaciones en TikTok y "+fmt(dd.cuentas.instagram.vis)+" en Instagram. El que mejor va es «"+m.titulo+"».")}
+  if(/classroom|clase/.test(n))return di("Classroom aún no está conectado.");
   if(/ayuda|que puedes|que sabes/.test(n))return di("Puedo decirte qué tienes hoy, abrirte la siguiente llamada, abrir un negocio por su nombre, leerte cómo empezar la llamada, decirte tus tareas y avisarte de las llamadas con hora.");
   di("Todavía no sé responder a eso. Prueba con: qué tengo para hoy, siguiente llamada, abre y el nombre de un negocio, o mis tareas.")}
 function tras(r,l){if(!$("#vozAvisos").checked||!l)return;
@@ -706,6 +753,33 @@ $("#vozAvisos").onchange=function(){try{localStorage.setItem("pm_vozAvisos",this
 try{$("#vozAvisos").checked=localStorage.getItem("pm_vozAvisos")=="1"}catch(e){}
 setInterval(avisos,30000);
 
+/* ---------- desplegable de tareas ---------- */
+$("#tarBtn").onclick=function(e){e.stopPropagation();var r=$("#rail");r.hidden=!r.hidden;this.setAttribute("aria-expanded",!r.hidden)};
+document.addEventListener("click",function(e){var r=$("#rail");if(!r.hidden&&!e.target.closest("#rail")&&!e.target.closest("#tarBtn"))r.hidden=true});
+document.addEventListener("keydown",function(e){if(e.key=="Escape")$("#rail").hidden=true});
+
+/* ---------- correo sin leer (Gmail a través del CRM) ---------- */
+var CORREOS=[];
+function cargarCorreo(){return api("/api/crm/correo").then(function(d){CONEX.correo=d.conectado;CORREOS=d.correos||[];if(!d.conectado)return;$("#bloqueCorreo").hidden=false;$("#correoSub").textContent=CORREOS.length?CORREOS.length+" en los últimos 3 días":"";
+  $("#correo").innerHTML=CORREOS.slice(0,6).map(function(c){return'<a class="it" target="_blank" rel="noopener" href="https://mail.google.com/mail/u/0/#inbox"><b>'+esc(c.asunto||"(sin asunto)")+'</b><span>'+esc(String(c.de).replace(/<.*>/,"").trim()+" · "+c.extracto)+'</span></a>'}).join("")||'<div class="vacio">Bandeja al día.</div>'}).catch(function(){})}
+
+/* ---------- redes sociales (Metricool, guardado en el CRM por Claude) ---------- */
+var REDES=null;
+function fmt(n){n=+n||0;return n>=1000?(n/1000).toFixed(n>=1e4?0:1).replace(".",",")+"k":String(Math.round(n))}
+function cargarRedes(){return api("/api/crm/redes").then(function(d){REDES=d;pintarRedes()}).catch(function(e){$("#redes").innerHTML='<div class="vacio">No se han podido leer las estadísticas: '+esc(e.message)+'</div>'})}
+function pintarRedes(){var d=REDES&&REDES.datos;if(!d){$("#redes").innerHTML='<div class="vacio">Todavía no hay estadísticas guardadas. Se actualizan solas varias veces al día.</div>';return}
+  var hace=REDES.actualizado?REDES.actualizado.replace("T"," "):"";$("#redesSub").textContent="Instagram y TikTok · últimos 30 días · actualizado "+hace;
+  var ig=d.cuentas.instagram||{},tt=d.cuentas.tiktok||{};
+  var max=Math.max.apply(null,d.reels.map(function(r){return Math.max(r.ig?r.ig.vis:0,r.tt?r.tt.vis:0)}).concat([1]));
+  var mejor=d.reels.slice().sort(function(a,b){return((b.ig?b.ig.vis:0)+(b.tt?b.tt.vis:0))-((a.ig?a.ig.vis:0)+(a.tt?a.tt.vis:0))})[0];
+  var K=function(nom,o){return'<div class="red"><h3>'+nom+'</h3><div class="nums">'+o.map(function(x){return'<div><b>'+fmt(x[1])+'</b><span>'+x[0]+'</span></div>'}).join("")+'</div></div>'};
+  var html='<div class="redes-k">'+K("Instagram · @pmotionia",[["Reels",ig.reels],["Visualizaciones",ig.vis],["Alcance",ig.alcance],["Interacciones",ig.interacciones]])+K("TikTok · @pmotionia",[["Seguidores",tt.seguidores],["Visualizaciones",tt.vis],["Visitas al perfil",tt.perfil],["Interacciones",tt.interacciones]])+'</div>';
+  html+='<p class="titulo">Cada reel <span class="mute sm">ordenados por fecha</span></p><div class="reels">'+d.reels.map(function(r){var tot=(r.ig?r.ig.vis:0)+(r.tt?r.tt.vis:0),img=(r.tt&&r.tt.img)||(r.ig&&r.ig.img)||"";
+    var fila=function(n,s,l){if(!s)return"";return'<span class="n">'+n+'</span><span class="v"><span title="Visualizaciones">▶ '+fmt(s.vis)+'</span><span title="Me gusta">♥ '+fmt(s.likes)+'</span><span title="Comentarios">💬 '+fmt(s.com)+'</span>'+(s.comp?'<span title="Compartidos">↗ '+fmt(s.comp)+'</span>':'')+'</span><span class="bar"><i style="width:'+Math.round(100*s.vis/max)+'%"></i></span>'};
+    return'<div class="reel"><div class="img" style="background-image:url(\''+esc(img)+'\')">'+(r===mejor?'<span class="top v">El mejor</span>':'<span class="top">'+fmt(tot)+' vis.</span>')+'</div><div class="b"><span class="f">'+esc(r.fecha.slice(8,10)+"/"+r.fecha.slice(5,7)+(r.hora?" · "+r.hora:""))+'</span><span class="t">'+esc(r.titulo)+'</span><div class="st">'+fila("Instagram",r.ig)+fila("TikTok",r.tt)+'</div><div class="lk">'+(r.ig&&r.ig.url?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(r.ig.url)+'">Instagram</a>':'')+(r.tt&&r.tt.url?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(r.tt.url)+'">TikTok</a>':'')+'</div></div></div>'}).join("")+'</div>';
+  $("#redes").innerHTML=html}
+$("#redesRef").onclick=function(){cargarRedes().then(function(){toast("Estadísticas recargadas")})};
+
 /* ---------- bienvenida y arranque ---------- */
 function bienvenida(){var t="Hola, Pau";$("#holaTxt").innerHTML=t.split("").map(function(c,i){return'<span style="animation-delay:'+(.25+i*.05)+'s">'+(c==" "?"&nbsp;":esc(c))+'</span>'}).join("");$("#holaSub").textContent="Preparando tu día…";
   var el=$("#hola");el.hidden=false;var cerrar=function(){if(el.hidden)return;el.classList.add("fuera");setTimeout(function(){el.hidden=true;el.classList.remove("fuera")},720)};el.onclick=cerrar;setTimeout(cerrar,3000)}
@@ -718,7 +792,7 @@ function start(){
   api("/api/crm/conexiones").then(function(c){for(var k in c)CONEX[k]=c[k];pintarConex()}).catch(function(){});
   api("/api/crm/guion-base").then(function(g){GUION_BASE=g.texto||""}).catch(function(){});
   var dL=cargar().catch(function(e){$("#cola").innerHTML='<div class="vacio">No se ha podido leer el CRM: '+esc(e.message)+'</div>'});
-  Promise.all([dL,cargarAgenda(),cargarTareas(),cargarContenido()]).then(function(){pintarConex();
+  Promise.all([dL,cargarAgenda(),cargarTareas(),cargarContenido(),cargarCorreo(),cargarRedes()]).then(function(){pintarConex();
     var p=pendientes().length,c=AGENDA.filter(function(e){return e.inicio.slice(0,10)==HOY}).length+demosHoy().length,t=tareasHoy().length;
     if(verHola)$("#holaSub").innerHTML="Hoy tienes <b>"+p+" llamada"+(p==1?"":"s")+"</b>"+(c?", <b>"+c+" cita"+(c==1?"":"s")+"</b>":"")+(t?" y <b>"+t+" tarea"+(t==1?"":"s")+"</b>":"")+".";
     if($("#vozAvisos").checked)setTimeout(function(){di(resumenDia())},verHola?3200:600)});

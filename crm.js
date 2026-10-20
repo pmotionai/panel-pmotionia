@@ -77,8 +77,21 @@ function parseICS(txt, desde, hasta){
   return out.sort((a, b) => a.inicio.localeCompare(b.inicio));
 }
 let calCache = { t:0, ev:null };
+// Agenda y correo a través del Apps Script del CRM (cuenta de Google de Pau): sin claves extra
+let resCache = { t:0, d:null };
+async function resumenGoogle(){
+  if (!resCache.d || Date.now() - resCache.t > 5 * 60000){ resCache = { t:Date.now(), d:await hoja({ action:"resumen" }) }; }
+  return resCache.d;
+}
+async function correo(){
+  try { const r = await resumenGoogle(); return { conectado:true, correos:r.correos || [] }; } catch (e) { return { conectado:false, correos:[], error:String(e.message || e) }; }
+}
+async function redes(){
+  const r = await hoja({ action:"kv", clave:"redes" });
+  return { datos:r.valor ? JSON.parse(r.valor) : null, actualizado:r.actualizado || null };
+}
 async function agenda(){
-  if (!E.ICS_URL) return { conectado:false, eventos:[] };
+  if (!E.ICS_URL){ try { const r = await resumenGoogle(); return { conectado:true, eventos:r.eventos || [] }; } catch (e) { return { conectado:false, eventos:[] }; } }
   if (!calCache.ev || Date.now() - calCache.t > 5 * 60000){
     const txt = await (await fetch(E.ICS_URL)).text();
     const hoy = madrid(new Date()).slice(0, 10);
@@ -126,7 +139,7 @@ async function metricool(){
   return { conectado:true, posts };
 }
 
-const conexiones = () => ({ hoja:!!(E.CRM_URL && E.CRM_TOKEN), calendar:!!E.ICS_URL, todoist:!!E.TODOIST_TOKEN, metricool:!!(E.METRICOOL_TOKEN && E.METRICOOL_USER && E.METRICOOL_BLOG), guion:!!leeGuion() });
+const conexiones = () => ({ hoja:!!(E.CRM_URL && E.CRM_TOKEN), calendar:!!E.ICS_URL || !!resCache.d, correo:!!resCache.d, todoist:!!E.TODOIST_TOKEN, metricool:!!(E.METRICOOL_TOKEN && E.METRICOOL_USER && E.METRICOOL_BLOG), guion:!!leeGuion() });
 
 /* ---------- rutas ---------- */
 async function handle(req, res, P, send, readBody){
@@ -136,6 +149,8 @@ async function handle(req, res, P, send, readBody){
     if (P === "/api/crm/agenda") return ok(agenda());
     if (P === "/api/crm/metricool") return ok(metricool());
     if (P === "/api/crm/tareas") return ok(tareasTodoist());
+    if (P === "/api/crm/correo") return ok(correo());
+    if (P === "/api/crm/redes") return ok(redes());
     if (P === "/api/crm/conexiones") return send(res, 200, conexiones());
     if (P === "/api/crm/guion-base") return send(res, 200, { texto:leeGuion() });
     return send(res, 404, { error:"no" });
