@@ -43,6 +43,7 @@ http.createServer((req, res) => {
   if (P.startsWith("/api/")){
     if (!PIN || req.headers["x-pin"] !== PIN) return send(res, 401, { error:"PIN incorrecto" });
     if (P === "/api/state") return send(res, 200, state());
+    if (P.startsWith("/api/crm/")) return require("./crm").handle(req, res, P, send, readBody);
     if (!POST) return send(res, 405, { error:"method" });
     return readBody(req, b => {
       if (!b) return send(res, 400, { error:"json" });
@@ -85,6 +86,6 @@ http.createServer((req, res) => {
   });
   const file = path.join(PUB, P === "/" ? "index.html" : path.normalize(decodeURIComponent(P)));
   if (!file.startsWith(PUB)) return send(res, 403, "no", "text/plain");
-  const TYPES = { ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".webmanifest":"application/manifest+json", ".png":"image/png" };
+  const TYPES = { ".svg":"image/svg+xml", ".css":"text/css; charset=utf-8", ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".webmanifest":"application/manifest+json", ".png":"image/png" };
   fs.readFile(file, (e, d) => e ? send(res, 404, "No encontrado", "text/plain") : send(res, 200, d, TYPES[path.extname(file)] || "application/octet-stream"));
 }).listen(PORT, () => console.log("Panel PmotionIA en :" + PORT + (vKey ? " · push activado" : " · push sin claves") + (PIN ? "" : " · SIN PIN")));
