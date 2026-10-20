@@ -47,7 +47,7 @@ aside.nav{border-right:1px solid var(--line);padding:24px 14px;display:flex;flex
 .navb .cnt{margin-left:auto;font-family:var(--fm);font-size:11px;background:var(--ink);color:#fff;border-radius:999px;padding:1px 7px}
 .navb .cnt:empty{display:none}
 aside.nav .pie{margin-top:auto;padding:12px 10px 0;font-size:12px;color:var(--mute);display:flex;align-items:center;gap:8px}
-.navb.mtareas{display:none}
+.navb.mtareas{display:flex}
 main{padding:34px clamp(18px,3.4vw,44px) 110px;min-width:0;overflow-x:clip}
 section.v{display:none}section.v.on{display:block;animation:entra .45s var(--ease)}
 @keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -128,10 +128,10 @@ button.e:hover{background:var(--soft)}
 .rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 
 /* ---------- tareas (columna fija) ---------- */
-#tarBtn{position:fixed;top:18px;right:clamp(16px,2.4vw,32px);z-index:35;box-shadow:var(--sh)}
+#tarBtn{display:none!important}
 #tarBtn .cnt{font-family:var(--fm);font-size:11px;background:var(--green);color:#fff;border-radius:999px;padding:1px 7px}
 #tarBtn .cnt:empty{display:none}
-aside.rail{position:fixed;top:66px;right:clamp(16px,2.4vw,32px);width:min(380px,calc(100vw - 32px));max-height:min(72vh,640px);overflow-y:auto;background:var(--bg);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh2);padding:20px 20px 16px;z-index:36;transform-origin:top right;animation:pop .3s var(--spring)}
+aside.rail{position:fixed;top:110px;left:244px;width:min(380px,calc(100vw - 32px));max-height:min(72vh,640px);overflow-y:auto;background:var(--bg);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh2);padding:20px 20px 16px;z-index:36;transform-origin:top left;animation:pop .3s var(--spring)}
 .rail h2{font-size:18px;font-weight:700;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .tarea{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;padding:10px 0;border-bottom:1px solid var(--line);align-items:start}
 .tarea .chk{width:20px;height:20px;border-radius:50%;border:1.5px solid #cfcfcf;background:none;padding:0;display:grid;place-items:center;transition:all .2s var(--spring);margin-top:1px}
@@ -313,7 +313,7 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
     <div class="marca"><span class="logo">P</span>PmotionIA</div>
     <button class="navb on" data-v="hoy"><svg class="i"><use href="#i-hoy"/></svg>Hoy</button>
     <button class="navb" data-v="clientes"><svg class="i"><use href="#i-cli"/></svg>Clientes<span class="cnt" id="cntCli"></span></button>
-    <button class="navb mtareas" data-v="tareas"><svg class="i"><use href="#i-tar"/></svg>Tareas<span class="cnt" id="cntTar"></span></button>
+    <button class="navb mtareas" data-v="tareas"><svg class="i"><use href="#i-tar"/></svg>Tareas de hoy<span class="cnt" id="cntTar"></span></button>
     <button class="navb" data-v="redes"><svg class="i"><use href="#i-red"/></svg>Redes</button>
     <button class="navb" data-v="actividad"><svg class="i"><use href="#i-act"/></svg>Actividad</button>
     <button class="navb" data-v="ajustes"><svg class="i"><use href="#i-aj"/></svg>Ajustes</button>
@@ -646,7 +646,7 @@ $("#fNotaOk").onclick=function(){var t=$("#fNota").value.trim();if(!t)return;var
 
 /* ---------- navegación ---------- */
 function ir(v){document.querySelectorAll(".navb").forEach(function(x){x.classList.toggle("on",x.dataset.v==v)});document.querySelectorAll("section.v").forEach(function(s){s.classList.toggle("on",s.id=="v-"+v)});window.scrollTo(0,0)}
-document.querySelectorAll(".navb").forEach(function(b){b.onclick=function(){ir(b.dataset.v)}});
+document.querySelectorAll(".navb").forEach(function(b){b.onclick=function(e){if(b.dataset.v=="tareas"&&innerWidth>860){e.stopPropagation();var r=$("#rail");r.hidden=!r.hidden;return}ir(b.dataset.v)}});
 document.addEventListener("click",function(e){
   var c=e.target.closest("[data-id]");if(c&&!e.target.closest("a")){var L=c.dataset.lista;return abrir(c.dataset.id,L=="cli"?ORDEN_LISTA:ORDEN_HOY)}
   var a=e.target.closest("[data-abrir]");if(a)return abrir(a.dataset.abrir,ORDEN_HOY);
@@ -755,7 +755,7 @@ setInterval(avisos,30000);
 
 /* ---------- desplegable de tareas ---------- */
 $("#tarBtn").onclick=function(e){e.stopPropagation();var r=$("#rail");r.hidden=!r.hidden;this.setAttribute("aria-expanded",!r.hidden)};
-document.addEventListener("click",function(e){var r=$("#rail");if(!r.hidden&&!e.target.closest("#rail")&&!e.target.closest("#tarBtn"))r.hidden=true});
+document.addEventListener("click",function(e){var r=$("#rail");if(!r.hidden&&!e.target.closest("#rail")&&!e.target.closest(".mtareas"))r.hidden=true});
 document.addEventListener("keydown",function(e){if(e.key=="Escape")$("#rail").hidden=true});
 
 /* ---------- correo sin leer (Gmail a través del CRM) ---------- */
