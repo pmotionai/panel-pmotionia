@@ -441,7 +441,7 @@ function esInmo(l){return/inmobil|finques|fincas|real estate|immobil|habitat|lla
 function esGest(l){return/gestor|asesor|assessor|tr[aà]mit|consult/i.test((l.Tipo||"")+" "+l.Negocio)}
 
 /* ---------- datos ---------- */
-function cargar(fresh){return api("/api/crm/leads"+(fresh?"?fresh=1":"")).then(function(d){LEADS=d.rows||[];HOY=d.hoy;pintarTodo();return d})}
+function cargar(fresh){return api("/api/crm/leads"+(fresh?"?fresh=1":"")).then(function(d){LEADS=(d.rows||[]).filter(function(l){return!VIEJO.test(l.Tipo||"")}); /* peluquerías y estéticas (nicho antiguo) fuera de la app; siguen en la hoja */HOY=d.hoy;pintarTodo();return d})}
 function pendientes(){return LEADS.filter(function(l){return EN_COLA.indexOf(l.Estado)>=0&&!VIEJO.test(l.Tipo||"")&&(fechaDe(l)?fechaDe(l)<=HOY:l.Estado!="CON FECHA")})
   .sort(function(a,b){var fa=fechaDe(a)||"9",fb=fechaDe(b)||"9";if(fa!=fb)return fa<fb?-1:1;return(horaDe(a)||"99").localeCompare(horaDe(b)||"99")})}
 var RX_HECHA=null;
