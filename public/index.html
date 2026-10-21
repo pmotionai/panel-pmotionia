@@ -412,7 +412,7 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
       <div class="card"><p class="titulo">Historial</p><div class="hist" id="fHist"></div><div class="mini"><input class="in" id="fNota" placeholder="Añadir una nota"><button class="btn sm" id="fNotaOk">Guardar</button></div></div>
     </div>
     <div class="izq">
-      <div class="card"><div class="tabs"><button class="on" data-g="hecho">Guion para este negocio</button><button data-g="oficial">Guion oficial</button></div><div class="guion" id="fGuion"></div></div>
+      <div class="card"><div class="tabs"><button class="on" id="gTit">Guion</button></div><div class="guion" id="fGuion"></div></div>
       <div class="card"><p class="titulo">Resultado de la llamada</p><div class="res" id="fRes"></div><div id="fForm"></div></div>
     </div>
   </div>
@@ -545,39 +545,56 @@ function ganchoCorto(l){
   if(esGest(l))return"«¿Cuántas veces al día os preguntan lo mismo por WhatsApp?»";
   return"«Te llamo por una cosa concreta de vuestro negocio, te robo un minuto.»";
 }
+function sector(l){var t=(l.Tipo||"")+" "+l.Negocio;
+  if(esInmo(l))return{k:"inmo",nom:"inmobiliaria",gente:"compradores e inquilinos",dolor:"los contactos que llegan por WhatsApp o Idealista de noche o el fin de semana se contestan el lunes, y para entonces el comprador ya ha escrito a tres agencias más",
+    preg:["«Y a quien vio un piso y no decidió, ¿cómo os acordáis de volver a llamarle?»","«¿Cuánto tiempo os va en cuadrar visitas?»"],
+    sol:["Contestan tarde → **asistente de WhatsApp** que contesta al momento, pregunta zona y presupuesto y propone visita.","Se olvidan de volver a llamar → **CRM con avisos**: cada mañana sabéis a quién llamar.","No llegan al teléfono → **asistente de voz** que coge la llamada y os deja el resumen."],
+    hora:"Mejor hora: martes a jueves, 9:30–10:30 o 16:30–17:30."};
+  if(esGest(l))return{k:"gest",nom:/assessor|asesor/i.test(t)?"asesoría":"gestoría",gente:"clientes",dolor:"clientes que mandan las facturas el último día y las mismas preguntas por WhatsApp todo el día",
+    preg:["«¿Cuántas veces al día os preguntan lo mismo?»","«¿Cómo perseguís a los clientes que no mandan la documentación?»"],
+    sol:["Documentación tarde → **avisos automáticos** a los clientes con lo que tienen que mandar y cuándo.","Preguntas repetidas → **asistente de WhatsApp** que responde las dudas de siempre.","Se pierden tareas → **CRM con avisos** por cliente."],
+    hora:"Mejor hora: 8:00–9:30. Evita del 10 al 20 de enero, abril, julio y octubre."};
+  if(/fisio|osteo|cl[ií]nica|dent|psic|podo|nutri/i.test(t))return{k:"salud",nom:/fisio/i.test(t)?"centro de fisioterapia":"clínica",gente:"pacientes",dolor:"el teléfono suena mientras estáis con un paciente, las citas se pierden y los huecos que deja una anulación se quedan vacíos",
+    preg:["«Cuando estáis con un paciente, ¿quién coge el teléfono?»","«¿Cuántas citas se os anulan a la semana sin avisar?»"],
+    sol:["No pueden coger el teléfono → **asistente de voz** que atiende y da cita.","Anulaciones → **recordatorios por WhatsApp** el día antes y lista de espera para el hueco.","Pacientes que no vuelven → **CRM con avisos** para recuperar a los que dejaron el tratamiento."],
+    hora:"Mejor hora: a primera hora o justo antes de comer, entre sesiones."};
+  return{k:"otro",nom:(l.Tipo||"negocio").toLowerCase(),gente:"clientes",dolor:"se pierde mucho tiempo contestando lo mismo y persiguiendo a clientes",
+    preg:["«¿Qué es lo que más tiempo os quita en el día a día?»"],sol:["Contestan tarde → **asistente de WhatsApp**.","Se olvidan de llamar → **CRM con avisos**."],hora:"Llama en horario de mañana."}}
 function generarGuion(l){
-  var inmo=esInmo(l),gest=esGest(l),N=l.Negocio,nt=notasDe(l),txt=String(l.Notas||"");
-  var wa=/whatsapp enviado/i.test(txt),auto=/respuesta autom/i.test(txt),sinWeb=/sin web|^no$/i.test(String(l["Web actual"]||"").trim())||!l["Web actual"],nota=parseFloat(l["Nota Google"]),res=parseInt(l["Reseñas"]);
+  var S=sector(l),N=l.Negocio,Z=l.Zona&&l.Zona!="Maresme"?l.Zona:"",nt=notasDe(l),txt=String(l.Notas||"");
+  var wa=/whatsapp enviado|whatsapp sin respuesta/i.test(txt+" "+(l["Próxima acción"]||"")),auto=/respuesta autom/i.test(txt),email=/email enviado/i.test(txt),
+    sinWeb=/sin web|^no$/i.test(String(l["Web actual"]||"").trim())||!l["Web actual"],nota=parseFloat(l["Nota Google"]),res=parseInt(l["Reseñas"]),a=abierto(l);
   var dias=proxLaborables(2),out=[];
-  out.push("## Antes de llamar");
+  out.push("## Antes de llamar a "+N);
   var antes=[];
+  if(a)antes.push((a.ok?"Ahora **abierto**":"Ahora **cerrado**")+(a.txt.indexOf("· ")>0?": "+a.txt.split("· ")[1]:"")+".");
   antes.push("Busca el **nombre del dueño** en las reseñas de Google o en «Quiénes somos» de su web.");
-  if(nota&&res)antes.push("En Google: **"+String(nota).replace(".",",")+" ★ con "+res+" reseñas**"+(res>=100?": mueven mucho contacto, ese es el ángulo.":nota>=4.8?": muy buena nota, pocos contactos todavía.":"."));
-  if(sinWeb)antes.push("No tienen web propia: sus contactos llegan por teléfono, WhatsApp y portales.");
+  if(nota&&res)antes.push("En Google: **"+String(nota).replace(".",",")+" ★ con "+res+" reseñas**"+(res>=100?": mueven muchos "+S.gente+", ese es el ángulo.":nota>=4.8?": muy buena nota, todavía pocos "+S.gente+" opinando.":"."));
+  if(sinWeb)antes.push("No tienen web propia: sus "+S.gente+" llegan por teléfono, WhatsApp"+(S.k=="inmo"?" y portales":"")+".");
   if(wa)antes.push("Ya le escribiste por WhatsApp"+(auto?" (contestó una respuesta automática)":"")+": menciónalo al empezar.");
-  antes.push(inmo?"Mejor hora: martes a jueves, 9:30–10:30 o 16:30–17:30.":gest?"Mejor hora: 8:00–9:30. Evita del 10 al 20 de enero, abril, julio y octubre.":"Llama en horario de mañana.");
+  if(email)antes.push("Les enviaste un correo: empieza por ahí.");
+  antes.push(S.hora);
   if(nt.length)antes.push("Última nota: «"+nt[nt.length-1].slice(0,140)+"»");
-  antes.forEach(function(a){out.push("- "+a)});
+  antes.forEach(function(x){out.push("- "+x)});
   out.push("## Apertura");
-  out.push("> «Buenos días, ¿hablo con **"+N+"**? Soy Pau, de PmotionIA, de Mataró. "+(wa?"Te escribí por WhatsApp hace unos días y te llamo por eso en concreto, ":"Te llamo por una cosa concreta, ")+"te robo un minuto, ¿vale?»");
+  out.push("> «Buenos días, ¿hablo con **"+N+"**? Soy Pau, de PmotionIA, de Mataró. "+(email?"Os envié el correo que me pedisteis y os llamo para comentarlo, ":wa?"Os escribí por WhatsApp hace unos días y os llamo por eso en concreto, ":"Os llamo por una cosa concreta, ")+"te robo un minuto, ¿vale?»");
   out.push("*(Espera su «sí» o «dime». No digas «¿qué tal?»)*");
   out.push("## Gancho");
-  if(inmo)out.push("> «Hablo con muchas inmobiliarias del Maresme"+(l.Zona&&l.Zona!="Maresme"?", también de "+l.Zona:"")+", y casi todas me dicen lo mismo: los contactos que llegan por WhatsApp o Idealista de noche o el fin de semana se contestan el lunes, y para entonces el comprador ya ha escrito a tres agencias más."+(res>=100?" Con "+res+" reseñas, a vosotros os debe de entrar mucho movimiento.":"")+" ¿A vosotros os pasa?»");
-  else if(gest)out.push("> «Yo trabajo en una gestoría y sé lo que es un cierre de trimestre: clientes que mandan las facturas el último día y las mismas preguntas por WhatsApp todo el día. ¿Cómo lo lleváis vosotros"+(l.Zona?" en "+l.Zona:"")+"?»");
-  else out.push("> «Hablo con muchos negocios como el vuestro y casi todos pierden tiempo contestando lo mismo y persiguiendo a clientes. ¿A vosotros os pasa?»");
+  if(S.k=="gest")out.push("> «Yo trabajo en una gestoría y sé lo que es un cierre de trimestre: "+S.dolor+". ¿Cómo lo lleváis en **"+N+"**?»");
+  else out.push("> «Hablo con muchas "+(S.k=="inmo"?"inmobiliarias":S.k=="salud"?"clínicas y centros":"empresas")+" del Maresme"+(Z?", también de "+Z:"")+", y casi todas me dicen lo mismo: "+S.dolor+"."+(res>=100?" Con "+res+" reseñas, en **"+N+"** os debe de entrar mucho movimiento.":"")+" ¿A vosotros os pasa?»");
   out.push("*(Calla y deja que conteste.)*");
   out.push("## Preguntas");
-  (inmo?["«Y a quien vio un piso y no decidió, ¿cómo os acordáis de volver a llamarle?»","«¿Cuánto tiempo os va en cuadrar visitas?»"]:gest?["«¿Cuántas veces al día os preguntan lo mismo?»","«¿Cómo perseguís a los clientes que no mandan la documentación?»"]:["«¿Qué es lo que más tiempo os quita en el día a día?»"]).forEach(function(q){out.push("- "+q)});
-  out.push("- La clave: «Si mañana pudierais quitaros **una sola tarea**, ¿cuál sería?»");
+  S.preg.forEach(function(q){out.push("- "+q)});
+  out.push("- La clave: «Si mañana pudierais quitaros **una sola tarea** en "+N+", ¿cuál sería?»");
   out.push("## Puente");
-  out.push("> «O sea, lo que más os pesa es **[lo que ha dicho]**. Justo eso es lo que hago: automatizo las tareas que os llevan mucho tiempo. En vuestro caso sería…»");
-  (inmo?["Contestan tarde → **asistente de WhatsApp** que contesta al momento, pregunta zona y presupuesto y propone visita.","Se olvidan de volver a llamar → **CRM con avisos**: cada mañana sabéis a quién llamar.","No llegan al teléfono → **asistente de voz** que coge la llamada y os deja el resumen."]:gest?["Documentación tarde → **avisos automáticos** a los clientes con lo que tienen que mandar y cuándo.","Preguntas repetidas → **asistente de WhatsApp** que responde las dudas de siempre.","Se pierden tareas → **CRM con avisos** por cliente."]:["Contestan tarde → asistente de WhatsApp.","Se olvidan de llamar → CRM con avisos."]).forEach(function(x){out.push("- "+x)});
+  out.push("> «O sea, lo que más os pesa es **[lo que ha dicho]**. Justo eso es lo que hago: automatizo las tareas que más tiempo os quitan, para que os centréis en los "+S.gente+". En "+(S.k=="salud"?"un ":"una ")+S.nom+" como **"+N+"** sería…»");
+  S.sol.forEach(function(x){out.push("- "+x)});
   out.push("## Cierre");
-  out.push("> «Te propongo una cosa: preparo una demo con **vuestro caso** y te la enseño en 15 minutos. ¿Te va mejor el **"+dias[0]+"** o el **"+dias[1]+"**? ¿Por la mañana o por la tarde?»");
+  out.push("> «Te propongo una cosa: preparo una demo con el caso de **"+N+"** y te la enseño en 15 minutos. ¿Te va mejor el **"+dias[0]+"** o el **"+dias[1]+"**? ¿Por la mañana o por la tarde?»");
   out.push("## Si te dice…");
-  var obj=[["«¿Cuánto cuesta?»","«Depende de qué automaticemos, por eso prefiero enseñártelo con vuestro caso. Para que te hagas una idea, desde 1.200 € de puesta en marcha y unos 500 € al mes, sin permanencia.» Y vuelve a la demo."],["«Mándame información»","«Claro, ¿a qué correo? Y mejor aún: 15 minutos y lo ves con tu caso. ¿"+dias[0]+" o "+dias[1]+"?»"],["«Somos pocos»","«Justo a los equipos pequeños es a los que más ayuda: cada contacto perdido pesa más.»"]];
-  if(inmo)obj.push(["«Ya usamos un programa»","«¿Cuál? Muchas veces se conecta con lo que ya tenéis, sin cambiarlo.»"]);
-  if(gest)obj.push(["«¿Y la protección de datos?»","«Buena pregunta: en la demo te enseño dónde quedan los datos y cómo se cumple el RGPD.»"]);
+  var obj=[["«¿Cuánto cuesta?»","«Depende de qué automaticemos, por eso prefiero enseñártelo con vuestro caso. Para que te hagas una idea, desde 1.200 € de puesta en marcha y unos 500 € al mes, sin permanencia.» Y vuelve a la demo."],["«Mándame información»","«Claro, ¿a qué correo? Y mejor aún: 15 minutos y lo ves con el caso de "+N+". ¿"+dias[0]+" o "+dias[1]+"?»"],["«Somos pocos»","«Justo a los equipos pequeños es a los que más ayuda: cada "+(S.k=="salud"?"paciente":"contacto")+" perdido pesa más.»"]];
+  if(S.k=="inmo")obj.push(["«Ya usamos un programa»","«¿Cuál? Muchas veces se conecta con lo que ya tenéis, sin cambiarlo.»"]);
+  if(S.k=="gest"||S.k=="salud")obj.push(["«¿Y la protección de datos?»","«Buena pregunta: en la demo te enseño dónde quedan los datos y cómo se cumple el RGPD.»"]);
   if(/cadena|franquicia|grocasa|tecnocasa|donpiso|urbenia/i.test(N+txt))obj.unshift(["«Eso lo decide la central»","«Lo entiendo. ¿Quién de la central lleva estos temas? Os preparo la demo para que se la enseñéis.»"]);
   obj.forEach(function(o){out.push("- **"+o[0]+"** → "+o[1])});
   return out.join("\n");
@@ -595,7 +612,7 @@ function md(t){var out=[],lista=false,tabla=false;
   if(lista)out.push("</ul>");if(tabla)out.push("</table>");return out.join("")}
 function pintarGuion(){var l=LEADS.find(function(x){return x.ID==SEL});if(!l)return;
   document.querySelectorAll("[data-g]").forEach(function(b){b.classList.toggle("on",b.dataset.g==GTAB)});
-  $("#fGuion").innerHTML=GTAB=="hecho"?md(generarGuion(l)):(GUION_BASE?md(guionOficial()):'<p class="mute">No se ha podido cargar el guion oficial.</p>');$("#fGuion").scrollTop=0}
+  $("#gTit").textContent="Guion · "+sector(l).nom;$("#fGuion").innerHTML=md(generarGuion(l));$("#fGuion").scrollTop=0}
 document.querySelectorAll("[data-g]").forEach(function(b){b.onclick=function(){GTAB=b.dataset.g;pintarGuion()}});
 
 /* ---------- ABIERTO / CERRADO (columna Horario) ---------- */
