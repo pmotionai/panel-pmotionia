@@ -44,6 +44,7 @@ http.createServer((req, res) => {
     if (!PIN || req.headers["x-pin"] !== PIN) return send(res, 401, { error:"PIN incorrecto" });
     if (P === "/api/state") return send(res, 200, state());
     if (P.startsWith("/api/crm/")) return require("./crm").handle(req, res, P, send, readBody);
+    if (P.startsWith("/api/cerebro/")) return require("./cerebro").handle(req, res, P, send, readBody);
     if (!POST) return send(res, 405, { error:"method" });
     return readBody(req, b => {
       if (!b) return send(res, 400, { error:"json" });
@@ -89,3 +90,9 @@ http.createServer((req, res) => {
   const TYPES = { ".svg":"image/svg+xml", ".css":"text/css; charset=utf-8", ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".webmanifest":"application/manifest+json", ".png":"image/png" };
   fs.readFile(file, (e, d) => e ? send(res, 404, "No encontrado", "text/plain") : send(res, 200, d, TYPES[path.extname(file)] || "application/octet-stream"));
 }).listen(PORT, () => console.log("Panel PmotionIA en :" + PORT + (vKey ? " · push activado" : " · push sin claves") + (PIN ? "" : " · SIN PIN")));
+
+// Render gratis se duerme a los 15 min sin visitas: de 7:00 a 23:00 (Madrid) se visita a sí mismo cada 10 min
+if (process.env.RENDER_EXTERNAL_URL) setInterval(() => {
+  const h = +new Intl.DateTimeFormat("es-ES", { hour:"numeric", hour12:false, timeZone:"Europe/Madrid" }).format(new Date());
+  if (h >= 7 && h < 23) fetch(process.env.RENDER_EXTERNAL_URL + "/manifest.webmanifest").catch(() => {});
+}, 10 * 60 * 1000);

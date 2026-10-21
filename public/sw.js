@@ -1,5 +1,5 @@
 // Service worker del panel PmotionIA: permite instalarlo como app y muestra los avisos push.
-const CACHE = "pmotionia-v3";
+const CACHE = "pmotionia-v4";
 self.addEventListener("push", e => {
   e.waitUntil(self.registration.pushManager.getSubscription().then(sub =>
     fetch("/pushmsg", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ endpoint: sub && sub.endpoint }) })
@@ -18,5 +18,9 @@ self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Pr
 self.addEventListener("fetch", e => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin || url.pathname.startsWith("/api/")) return;
-  e.respondWith(fetch(e.request, { cache:"no-store" }).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(url.pathname === "/" ? "/" : e.request, c)); return r; }).catch(() => caches.match(url.pathname === "/" ? "/" : e.request)));
+  // Si el servidor tarda (Render despertando), abre al momento con la copia guardada y se actualiza por detrás
+  const key = url.pathname === "/" ? "/" : e.request;
+  const red = fetch(e.request, { cache:"no-store" }).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(key, c)); return r; });
+  e.waitUntil(red.catch(() => {}));
+  e.respondWith(Promise.race([red, new Promise(ok => setTimeout(ok, 2500))]).then(r => r || caches.match(key).then(c => c || red)).catch(() => caches.match(key)));
 });
