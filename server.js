@@ -44,7 +44,7 @@ http.createServer((req, res) => {
     if (!PIN || req.headers["x-pin"] !== PIN) return send(res, 401, { error:"PIN incorrecto" });
     if (P === "/api/state") return send(res, 200, state());
     if (P.startsWith("/api/crm/")) return require("./crm").handle(req, res, P, send, readBody);
-    if (P.startsWith("/api/cerebro/")) return require("./cerebro").handle(req, res, P, send, readBody);
+    if (P.startsWith("/api/cerebro/")) { let c; try { c = require("./cerebro"); } catch (e) { return send(res, 503, { error:"El cerebro no está activado en este servidor" }); } return c.handle(req, res, P, send, readBody); }
     if (!POST) return send(res, 405, { error:"method" });
     return readBody(req, b => {
       if (!b) return send(res, 400, { error:"json" });
