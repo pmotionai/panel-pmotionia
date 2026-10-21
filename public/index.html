@@ -428,7 +428,9 @@ var $=function(s){return document.querySelector(s)};
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML}
 function ico(n){return'<svg class="i"><use href="#i-'+n+'"/></svg>'}
 function toast(t){var x=$("#toast");x.textContent=t;x.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(function(){x.classList.remove("on")},2600)}
-function api(p,b){return fetch(p,{method:b?"POST":"GET",headers:{"x-pin":PIN,"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined}).then(function(r){if(r.status==401){showPin("PIN incorrecto");throw new Error("PIN")}return r.json().then(function(j){if(!r.ok)throw new Error(j.error||"Error");return j})})}
+/* Si el servidor se está despertando o reiniciando, reintenta las lecturas (hasta ~1 min) en vez de dar error */
+function api(p,b,n){n=n||0;return api1(p,b).catch(function(e){if(b||e.message=="PIN"||n>=12)throw e;return new Promise(function(ok){setTimeout(ok,5000)}).then(function(){return api(p,b,n+1)})})}
+function api1(p,b){return fetch(p,{method:b?"POST":"GET",headers:{"x-pin":PIN,"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined}).then(function(r){if(r.status==401){showPin("PIN incorrecto");throw new Error("PIN")}return r.json().then(function(j){if(!r.ok)throw new Error(j.error||"Error");return j})})}
 var VIEJO=/pelu|est[eé]tic|barber|u[nñ]as/i; // nicho antiguo: fuera de la cola de llamadas
 var EN_COLA=["CON FECHA","VOLVER A LLAMAR","POR LLAMAR"];
 function fechaDe(l){var f=String(l["Fecha próxima acción"]||"");if(/^\d{4}-\d{2}-\d{2}/.test(f))return f.slice(0,10);var m=String(l["Próxima acción"]||"").match(/\d{4}-\d{2}-\d{2}/);return m?m[0]:""}
