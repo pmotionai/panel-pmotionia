@@ -586,8 +586,12 @@ function generarGuion(l){
   out.push("## Apertura");
   out.push("> «Buenos días, ¿hablo con **"+N+"**? Soy Pau, de PmotionIA. Soy especialista en automatizaciones con inteligencia artificial para "+S.plural+". "+(email?"Os envié el correo que me pedisteis y os llamo para comentarlo, ":wa?"Os escribí por WhatsApp hace unos días, ":"")+"¿tienes un minuto?»");
   out.push("*(Espera su «sí» o «dime».)*");
+  out.push("## ¿Sabéis qué es?");
+  out.push("> «¿Sabéis lo que son las automatizaciones con inteligencia artificial?»");
+  out.push("- **Si dice que no** → «Básicamente, lo que hago es ahorraros tiempo: automatizo las tareas más tediosas, las que más tiempo os quitan, para que os podáis centrar en las importantes y ser más eficientes.»");
+  out.push("- **Si dice que sí** → «Perfecto, pues lo que hago es aplicarlas para ahorraros tiempo en las tareas más tediosas, para que os centréis en las importantes.»");
   out.push("## El resultado");
-  out.push("> «Lo que hago con "+S.plural+" es conseguir "+S.resultado+".»");
+  out.push("> «Por ejemplo, con "+S.plural+" consigo "+S.resultado+".»");
   out.push("*(Es lo que consiguen, no lo que les falta: no supongas que tienen un problema.)*");
   out.push("## Pregunta, no supongas");
   S.preg.forEach(function(q){out.push("- "+q)});

@@ -1,5 +1,5 @@
 // Service worker del panel PmotionIA: permite instalarlo como app y muestra los avisos push.
-const CACHE = "pmotionia-v9";
+const CACHE = "pmotionia-v10";
 self.addEventListener("push", e => {
   e.waitUntil(self.registration.pushManager.getSubscription().then(sub =>
     fetch("/pushmsg", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ endpoint: sub && sub.endpoint }) })
