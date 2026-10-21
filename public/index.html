@@ -547,54 +547,59 @@ function ganchoCorto(l){
   if(esGest(l))return"«¿Cuántas veces al día os preguntan lo mismo por WhatsApp?»";
   return"«Te llamo por una cosa concreta de vuestro negocio, te robo un minuto.»";
 }
+/* Guion de venta por resultado: no suponemos su problema, contamos lo que consiguen y preguntamos cómo lo hacen hoy */
 function sector(l){var t=(l.Tipo||"")+" "+l.Negocio;
-  if(esInmo(l))return{k:"inmo",nom:"inmobiliaria",gente:"compradores e inquilinos",dolor:"los contactos que llegan por WhatsApp o Idealista de noche o el fin de semana se contestan el lunes, y para entonces el comprador ya ha escrito a tres agencias más",
-    preg:["«Y a quien vio un piso y no decidió, ¿cómo os acordáis de volver a llamarle?»","«¿Cuánto tiempo os va en cuadrar visitas?»"],
-    sol:["Contestan tarde → **asistente de WhatsApp** que contesta al momento, pregunta zona y presupuesto y propone visita.","Se olvidan de volver a llamar → **CRM con avisos**: cada mañana sabéis a quién llamar.","No llegan al teléfono → **asistente de voz** que coge la llamada y os deja el resumen."],
+  if(esInmo(l))return{k:"inmo",nom:"inmobiliaria",plural:"inmobiliarias",gente:"compradores e inquilinos",
+    resultado:"que cada persona que pregunta por un piso tenga respuesta en menos de un minuto, aunque sea domingo, y que vosotros solo entréis cuando ya hay una visita en el calendario",
+    preg:["«Ahora mismo, cuando alguien escribe por un piso un sábado por la noche, ¿cómo lo lleváis?»","«Y con quien vio un piso y no se decidió, ¿cómo hacéis el seguimiento?»"],
+    cons:[["Asistente de WhatsApp","cada contacto recibe respuesta al momento, se le pregunta zona y presupuesto y se le propone visita. **Más visitas con los mismos anuncios.**"],["Calendario","las visitas se agendan solas en vuestro calendario. **Os olvidáis de ir cuadrando horas.**"],["CRM con avisos","cada mañana sabéis a quién llamar. **Ninguna operación se pierde por no volver a llamar.**"]],
     hora:"Mejor hora: martes a jueves, 9:30–10:30 o 16:30–17:30."};
-  if(esGest(l))return{k:"gest",nom:/assessor|asesor/i.test(t)?"asesoría":"gestoría",gente:"clientes",dolor:"clientes que mandan las facturas el último día y las mismas preguntas por WhatsApp todo el día",
-    preg:["«¿Cuántas veces al día os preguntan lo mismo?»","«¿Cómo perseguís a los clientes que no mandan la documentación?»"],
-    sol:["Documentación tarde → **avisos automáticos** a los clientes con lo que tienen que mandar y cuándo.","Preguntas repetidas → **asistente de WhatsApp** que responde las dudas de siempre.","Se pierden tareas → **CRM con avisos** por cliente."],
+  if(esGest(l))return{k:"gest",nom:/assessor|asesor/i.test(t)?"asesoría":"gestoría",plural:"gestorías y asesorías",gente:"clientes",
+    resultado:"que las dudas de siempre se respondan solas, que los clientes manden la documentación a tiempo sin que tengáis que perseguirlos, y que el equipo dedique el día al trabajo que de verdad factura",
+    preg:["«¿Cómo os organizáis ahora para pedir la documentación a los clientes?»","«Y las consultas que llegan por WhatsApp o teléfono, ¿quién las atiende?»"],
+    cons:[["Avisos automáticos","cada cliente recibe qué tiene que mandar y cuándo. **Cierres de trimestre sin carreras de última hora.**"],["Asistente de WhatsApp","responde las preguntas de siempre al momento. **Horas libres cada semana para el equipo.**"],["CRM con avisos","cada cliente y cada trámite con su fecha. **Nada se queda olvidado.**"]],
     hora:"Mejor hora: 8:00–9:30. Evita del 10 al 20 de enero, abril, julio y octubre."};
-  if(/fisio|osteo|cl[ií]nica|dent|psic|podo|nutri/i.test(t))return{k:"salud",nom:/fisio/i.test(t)?"centro de fisioterapia":"clínica",gente:"pacientes",dolor:"el teléfono suena mientras estáis con un paciente, las citas se pierden y los huecos que deja una anulación se quedan vacíos",
-    preg:["«Cuando estáis con un paciente, ¿quién coge el teléfono?»","«¿Cuántas citas se os anulan a la semana sin avisar?»"],
-    sol:["No pueden coger el teléfono → **asistente de voz** que atiende y da cita.","Anulaciones → **recordatorios por WhatsApp** el día antes y lista de espera para el hueco.","Pacientes que no vuelven → **CRM con avisos** para recuperar a los que dejaron el tratamiento."],
+  if(/fisio|osteo|cl[ií]nica|dent|psic|podo|nutri/i.test(t))return{k:"salud",nom:/fisio/i.test(t)?"centro de fisioterapia":"clínica",plural:"clínicas y centros de salud",gente:"pacientes",
+    resultado:"que la agenda se llene sola: que cada llamada y cada WhatsApp acabe en cita aunque estéis con un paciente, y que los huecos de las anulaciones se vuelvan a ocupar",
+    preg:["«Cuando estáis en plena sesión y suena el teléfono, ¿cómo lo hacéis?»","«¿Cómo gestionáis ahora las anulaciones de última hora?»"],
+    cons:[["Asistente de voz y WhatsApp","atiende, resuelve dudas y da cita. **Ningún paciente se queda sin respuesta.**"],["Calendario y recordatorios","la cita entra sola y el paciente recibe aviso el día antes. **Menos huecos vacíos.**"],["CRM","sabéis quién dejó el tratamiento a medias. **Más pacientes que vuelven.**"]],
     hora:"Mejor hora: a primera hora o justo antes de comer, entre sesiones."};
-  return{k:"otro",nom:(l.Tipo||"negocio").toLowerCase(),gente:"clientes",dolor:"se pierde mucho tiempo contestando lo mismo y persiguiendo a clientes",
-    preg:["«¿Qué es lo que más tiempo os quita en el día a día?»"],sol:["Contestan tarde → **asistente de WhatsApp**.","Se olvidan de llamar → **CRM con avisos**."],hora:"Llama en horario de mañana."}}
+  return{k:"otro",nom:(l.Tipo||"negocio").toLowerCase(),plural:"negocios como el vuestro",gente:"clientes",
+    resultado:"que cada cliente reciba respuesta al momento y que vosotros dediquéis el tiempo a lo que de verdad hace crecer el negocio",
+    preg:["«¿Cómo os llegan ahora los clientes y quién los atiende?»"],
+    cons:[["Asistente de WhatsApp","respuesta al momento, 24 horas. **Más clientes atendidos.**"],["CRM con avisos","cada seguimiento a su hora. **Ninguna venta se pierde por olvido.**"]],hora:"Llama en horario de mañana."}}
 function generarGuion(l){
-  var S=sector(l),N=l.Negocio,Z=l.Zona&&l.Zona!="Maresme"?l.Zona:"",nt=notasDe(l),txt=String(l.Notas||"");
-  var wa=/whatsapp enviado|whatsapp sin respuesta/i.test(txt+" "+(l["Próxima acción"]||"")),auto=/respuesta autom/i.test(txt),email=/email enviado/i.test(txt),
-    sinWeb=/sin web|^no$/i.test(String(l["Web actual"]||"").trim())||!l["Web actual"],nota=parseFloat(l["Nota Google"]),res=parseInt(l["Reseñas"]),a=abierto(l);
+  var S=sector(l),N=l.Negocio,nt=notasDe(l),txt=String(l.Notas||"");
+  var wa=/whatsapp enviado|whatsapp sin respuesta/i.test(txt+" "+(l["Próxima acción"]||"")),email=/email enviado/i.test(txt),
+    nota=parseFloat(l["Nota Google"]),res=parseInt(l["Reseñas"]),a=abierto(l);
   var dias=proxLaborables(2),out=[];
   out.push("## Antes de llamar a "+N);
   var antes=[];
   if(a)antes.push((a.ok?"Ahora **abierto**":"Ahora **cerrado**")+(a.txt.indexOf("· ")>0?": "+a.txt.split("· ")[1]:"")+".");
   antes.push("Busca el **nombre del dueño** en las reseñas de Google o en «Quiénes somos» de su web.");
-  if(nota&&res)antes.push("En Google: **"+String(nota).replace(".",",")+" ★ con "+res+" reseñas**"+(res>=100?": mueven muchos "+S.gente+", ese es el ángulo.":nota>=4.8?": muy buena nota, todavía pocos "+S.gente+" opinando.":"."));
-  if(sinWeb)antes.push("No tienen web propia: sus "+S.gente+" llegan por teléfono, WhatsApp"+(S.k=="inmo"?" y portales":"")+".");
-  if(wa)antes.push("Ya le escribiste por WhatsApp"+(auto?" (contestó una respuesta automática)":"")+": menciónalo al empezar.");
+  if(nota&&res)antes.push("En Google: **"+String(nota).replace(".",",")+" ★ con "+res+" reseñas**.");
+  if(wa)antes.push("Ya le escribiste por WhatsApp: menciónalo al empezar.");
   if(email)antes.push("Les enviaste un correo: empieza por ahí.");
   antes.push(S.hora);
   if(nt.length)antes.push("Última nota: «"+nt[nt.length-1].slice(0,140)+"»");
   antes.forEach(function(x){out.push("- "+x)});
   out.push("## Apertura");
-  out.push("> «Buenos días, ¿hablo con **"+N+"**? Soy Pau, de PmotionIA, de Mataró. "+(email?"Os envié el correo que me pedisteis y os llamo para comentarlo, ":wa?"Os escribí por WhatsApp hace unos días y os llamo por eso en concreto, ":"Os llamo por una cosa concreta, ")+"te robo un minuto, ¿vale?»");
-  out.push("*(Espera su «sí» o «dime». No digas «¿qué tal?»)*");
-  out.push("## Gancho");
-  if(S.k=="gest")out.push("> «Yo trabajo en una gestoría y sé lo que es un cierre de trimestre: "+S.dolor+". ¿Cómo lo lleváis en **"+N+"**?»");
-  else out.push("> «Hablo con muchas "+(S.k=="inmo"?"inmobiliarias":S.k=="salud"?"clínicas y centros":"empresas")+" del Maresme"+(Z?", también de "+Z:"")+", y casi todas me dicen lo mismo: "+S.dolor+"."+(res>=100?" Con "+res+" reseñas, en **"+N+"** os debe de entrar mucho movimiento.":"")+" ¿A vosotros os pasa?»");
-  out.push("*(Calla y deja que conteste.)*");
-  out.push("## Preguntas");
+  out.push("> «Buenos días, ¿hablo con **"+N+"**? Soy Pau, de PmotionIA. Soy especialista en automatizaciones con inteligencia artificial para "+S.plural+". "+(email?"Os envié el correo que me pedisteis y os llamo para comentarlo, ":wa?"Os escribí por WhatsApp hace unos días, ":"")+"¿tienes un minuto?»");
+  out.push("*(Espera su «sí» o «dime».)*");
+  out.push("## El resultado");
+  out.push("> «Lo que hago con "+S.plural+" es conseguir "+S.resultado+".»");
+  out.push("*(Es lo que consiguen, no lo que les falta: no supongas que tienen un problema.)*");
+  out.push("## Pregunta, no supongas");
   S.preg.forEach(function(q){out.push("- "+q)});
-  out.push("- La clave: «Si mañana pudierais quitaros **una sola tarea** en "+N+", ¿cuál sería?»");
-  out.push("## Puente");
-  out.push("> «O sea, lo que más os pesa es **[lo que ha dicho]**. Justo eso es lo que hago: automatizo las tareas que más tiempo os quitan, para que os centréis en los "+S.gente+". En "+(S.k=="salud"?"un ":"una ")+S.nom+" como **"+N+"** sería…»");
-  S.sol.forEach(function(x){out.push("- "+x)});
+  out.push("*(Escucha. Lo que te cuente es lo que vas a usar después.)*");
+  out.push("## Qué consiguen");
+  out.push("> «Pues en **"+N+"** se traduciría en esto:»");
+  S.cons.forEach(function(c){out.push("- **"+c[0]+"** → "+c[1])});
+  out.push("*(Elige la que encaje con lo que te ha contado; no hace falta decir las tres.)*");
   out.push("## Cierre");
-  out.push("> «Te propongo una cosa: preparo una demo con el caso de **"+N+"** y te la enseño en 15 minutos. ¿Te va mejor el **"+dias[0]+"** o el **"+dias[1]+"**? ¿Por la mañana o por la tarde?»");
+  out.push("> «Lo mejor es que lo veas montado con el caso de **"+N+"**: son 15 minutos. ¿Te va mejor el **"+dias[0]+"** o el **"+dias[1]+"**? ¿Mañana o tarde?»");
   out.push("## Si te dice…");
-  var obj=[["«¿Cuánto cuesta?»","«Depende de qué automaticemos, por eso prefiero enseñártelo con vuestro caso. Para que te hagas una idea, desde 1.200 € de puesta en marcha y unos 500 € al mes, sin permanencia.» Y vuelve a la demo."],["«Mándame información»","«Claro, ¿a qué correo? Y mejor aún: 15 minutos y lo ves con el caso de "+N+". ¿"+dias[0]+" o "+dias[1]+"?»"],["«Somos pocos»","«Justo a los equipos pequeños es a los que más ayuda: cada "+(S.k=="salud"?"paciente":"contacto")+" perdido pesa más.»"]];
+  var obj=[["«Ya lo tenemos controlado»","«Genial, entonces vais por delante. Lo que suelo aportar es que lo mismo pase sin que nadie tenga que estar pendiente. En 15 minutos lo ves y decides.»"],["«¿Cuánto cuesta?»","«Depende de qué automaticemos, por eso prefiero enseñártelo con vuestro caso. Para que te hagas una idea, desde 1.200 € de puesta en marcha y unos 500 € al mes, sin permanencia.» Y vuelve a la demo."],["«Mándame información»","«Claro, ¿a qué correo? Y mejor aún: 15 minutos y lo ves con el caso de "+N+". ¿"+dias[0]+" o "+dias[1]+"?»"],["«Somos pocos»","«Justo ahí es donde más se nota: el tiempo que os devuelve va directo a "+(S.k=="salud"?"los pacientes":S.k=="inmo"?"vender":"lo importante")+".»"]];
   if(S.k=="inmo")obj.push(["«Ya usamos un programa»","«¿Cuál? Muchas veces se conecta con lo que ya tenéis, sin cambiarlo.»"]);
   if(S.k=="gest"||S.k=="salud")obj.push(["«¿Y la protección de datos?»","«Buena pregunta: en la demo te enseño dónde quedan los datos y cómo se cumple el RGPD.»"]);
   if(/cadena|franquicia|grocasa|tecnocasa|donpiso|urbenia/i.test(N+txt))obj.unshift(["«Eso lo decide la central»","«Lo entiendo. ¿Quién de la central lleva estos temas? Os preparo la demo para que se la enseñéis.»"]);
