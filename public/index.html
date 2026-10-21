@@ -584,7 +584,7 @@ function generarGuion(l){
   if(nt.length)antes.push("Última nota: «"+nt[nt.length-1].slice(0,140)+"»");
   antes.forEach(function(x){out.push("- "+x)});
   out.push("## Apertura");
-  out.push("> «Buenos días, ¿hablo con **"+N+"**? Soy Pau, de PmotionIA. Soy especialista en automatizaciones con inteligencia artificial para "+S.plural+". "+(email?"Os envié el correo que me pedisteis y os llamo para comentarlo, ":wa?"Os escribí por WhatsApp hace unos días, ":"")+"¿tienes un minuto?»");
+  out.push("> «Buenos días, ¿hablo con **"+N+"**? Me llamo Raffi/Pau. Soy especialista en automatizaciones con inteligencia artificial para "+S.plural+". "+(email?"Os envié el correo que me pedisteis y os llamo para comentarlo, ":wa?"Os escribí por WhatsApp hace unos días, ":"")+"¿tienes un minuto?»");
   out.push("*(Espera su «sí» o «dime».)*");
   out.push("## ¿Sabéis qué es?");
   out.push("> «¿Sabéis lo que son las automatizaciones con inteligencia artificial?»");
