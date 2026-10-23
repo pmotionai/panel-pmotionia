@@ -4,6 +4,9 @@ const http = require("http"), https = require("https"), fs = require("fs"), path
 const PORT = process.env.PORT || 10003;
 const PUB = path.join(__dirname, "public");
 const PIN = process.env.PANEL_PIN || "";
+const RAFFI_PIN = process.env.RAFFI_PIN || "";
+// Quién entra según el PIN: Pau lo ve todo; Raffi solo los leads, el guion y los resultados (sin correo, agenda ni tareas de Pau)
+const quien = p => (PIN && p === PIN) ? "Pau" : (RAFFI_PIN && p === RAFFI_PIN) ? "Raffi" : "";
 const VPUB = process.env.VAPID_PUBLIC || "", VPRIV = process.env.VAPID_PRIVATE || "";
 const COLS = ["actividad", "ordenes", "leads", "tareas"];
 let DB = { gen: Date.now().toString(36) }; COLS.forEach(c => DB[c] = {});
@@ -41,7 +44,15 @@ http.createServer((req, res) => {
   const url = new URL(req.url, "http://x"), P = url.pathname, POST = req.method === "POST";
   if (P === "/api/vapid") return vKey ? send(res, 200, VPUB, "text/plain") : send(res, 503, "sin claves", "text/plain");
   if (P.startsWith("/api/")){
-    if (!PIN || req.headers["x-pin"] !== PIN) return send(res, 401, { error:"PIN incorrecto" });
+    const Q = quien(req.headers["x-pin"]);
+    if (!Q) return send(res, 401, { error:"PIN incorrecto" });
+    req.quien = Q;
+    if (P === "/api/yo") return send(res, 200, { nombre:Q });
+    if (Q !== "Pau") {
+      if (P === "/api/state") return send(res, 200, { gen:DB.gen, actividad:[], ordenes:[], leads:[], tareas:[] });
+      if (/^\/api\/crm\/(correo|agenda|tareas|metricool)$/.test(P)) return send(res, 200, { conectado:false, eventos:[], tareas:[], correos:[], posts:[] });
+      if (!P.startsWith("/api/crm/") || /^\/api\/crm\/todoist/.test(P)) return send(res, 403, { error:"Solo Pau" });
+    }
     if (P === "/api/state") return send(res, 200, state());
     if (P.startsWith("/api/crm/")) return require("./crm").handle(req, res, P, send, readBody);
     if (P.startsWith("/api/cerebro/")) { let c; try { c = require("./cerebro"); } catch (e) { return send(res, 503, { error:"El cerebro no está activado en este servidor" }); } return c.handle(req, res, P, send, readBody); }
@@ -85,7 +96,7 @@ http.createServer((req, res) => {
     if (s) s.msg = null;
     send(res, 200, m);
   });
-  const file = path.join(PUB, P === "/" ? "index.html" : path.normalize(decodeURIComponent(P)));
+  const file = path.join(PUB, (P === "/" || P === "/raffi") ? "index.html" : path.normalize(decodeURIComponent(P)));
   if (!file.startsWith(PUB)) return send(res, 403, "no", "text/plain");
   const TYPES = { ".svg":"image/svg+xml", ".css":"text/css; charset=utf-8", ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".webmanifest":"application/manifest+json", ".png":"image/png" };
   fs.readFile(file, (e, d) => e ? send(res, 404, "No encontrado", "text/plain") : send(res, 200, d, TYPES[path.extname(file)] || "application/octet-stream"));

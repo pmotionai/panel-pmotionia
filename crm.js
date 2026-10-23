@@ -34,8 +34,8 @@ const RES = {
 async function resultado(b){
   const r = RES[b.resultado], id = String(b.id || "");
   if (!r || !/^L-\d+$/.test(id)) throw new Error("Datos incorrectos");
-  const detalle = String(b.detalle || "").slice(0, 300);
-  const set = { Notas:`+${r.nota}${detalle ? ": " + detalle : ""}`, Estado:r.Estado };
+  const detalle = String(b.detalle || "").slice(0, 300), firma = b.quien && b.quien !== "Pau" ? b.quien + ": " : "";
+  const set = { Notas:`+${firma}${r.nota}${detalle ? ": " + detalle : ""}`, Estado:r.Estado };
   if (r.accion) set["Próxima acción"] = r.accion + detalle;
   await hoja({ action:"update", sheet:"leads", find:{ ID:id }, set });
   cache.t = 0;
@@ -44,7 +44,7 @@ async function resultado(b){
 async function nota(b){
   const id = String(b.id || ""), t = String(b.texto || "").trim().slice(0, 500);
   if (!/^L-\d+$/.test(id) || !t) throw new Error("Datos incorrectos");
-  await hoja({ action:"update", sheet:"leads", find:{ ID:id }, set:{ Notas:"+" + t } });
+  await hoja({ action:"update", sheet:"leads", find:{ ID:id }, set:{ Notas:"+" + (b.quien && b.quien !== "Pau" ? b.quien + ": " : "") + t } });
   cache.t = 0;
   return { ok:true };
 }
@@ -157,6 +157,7 @@ async function handle(req, res, P, send, readBody){
   }
   return readBody(req, b => {
     if (!b) return send(res, 400, { error:"json" });
+    if (b) b.quien = req.quien;
     if (P === "/api/crm/resultado") return ok(resultado(b));
     if (P === "/api/crm/nota") return ok(nota(b));
     if (P === "/api/crm/todoist") return ok(todoist(b));
