@@ -165,4 +165,4 @@ async function handle(req, res, P, send, readBody){
     send(res, 404, { error:"no" });
   });
 }
-module.exports = { handle, todoist };
+module.exports = { handle, leads, agenda, correo, redes, metricool, tareasTodoist, todoist, nota, resultado, leeGuion, conexiones };

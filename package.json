@@ -1,1 +1,14 @@
-{ "name": "panel-pmotionia", "version": "1.0.0", "private": true, "scripts": { "start": "node server.js" }, "engines": { "node": ">=18" } }
+{
+ "name": "panel-pmotionia",
+ "version": "1.0.0",
+ "private": true,
+ "scripts": {
+  "start": "node server.js"
+ },
+ "engines": {
+  "node": ">=18"
+ },
+ "dependencies": {
+  "@anthropic-ai/sdk": "^0.137.0"
+ }
+}
