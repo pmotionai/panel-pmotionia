@@ -43,6 +43,8 @@ const state = () => ({ gen:DB.gen, actividad:list("actividad"), ordenes:list("or
 http.createServer((req, res) => {
   const url = new URL(req.url, "http://x"), P = url.pathname, POST = req.method === "POST";
   if (P === "/api/vapid") return vKey ? send(res, 200, VPUB, "text/plain") : send(res, 503, "sin claves", "text/plain");
+  // Cal.com avisa de cada reunión reservada desde la página de la bio → tarea en Todoist
+  if (P === "/api/calcom" && POST) return require("./calcom").handle(req, res, send);
   if (P.startsWith("/api/")){
     const Q = quien(req.headers["x-pin"]);
     if (!Q) return send(res, 401, { error:"PIN incorrecto" });
@@ -96,7 +98,7 @@ http.createServer((req, res) => {
     if (s) s.msg = null;
     send(res, 200, m);
   });
-  const file = path.join(PUB, (P === "/" || P === "/raffi") ? "index.html" : path.normalize(decodeURIComponent(P)));
+  const file = path.join(PUB, P === "/agenda" ? "agenda.html" : (P === "/" || P === "/raffi") ? "index.html" : path.normalize(decodeURIComponent(P)));
   if (!file.startsWith(PUB)) return send(res, 403, "no", "text/plain");
   const TYPES = { ".svg":"image/svg+xml", ".css":"text/css; charset=utf-8", ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".webmanifest":"application/manifest+json", ".png":"image/png" };
   fs.readFile(file, (e, d) => e ? send(res, 404, "No encontrado", "text/plain") : send(res, 200, d, TYPES[path.extname(file)] || "application/octet-stream"));

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PmotionIA · Agenda tu reunión</title>
+<meta name="description" content="Automatizaciones con IA para negocios: agenda una reunión de 15 minutos o pide más información por WhatsApp.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
+<style>
+/* Página de la bio (Instagram y TikTok): dos caminos, agendar o preguntar por WhatsApp */
+:root{--bg:#ffffff;--ink:#0b0b0b;--mute:#6b6b6b;--line:#ececec;--green:#16a34a;--green-d:#0f7a37;--soft:#f5f7f5}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:Geist,system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center;
+  padding:max(28px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
+main{width:100%;max-width:420px;display:flex;flex-direction:column;gap:22px;margin:auto 0}
+.logo{width:64px;height:64px;border-radius:18px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;font-size:30px;position:relative}
+.logo::after{content:"";position:absolute;right:-3px;top:-3px;width:14px;height:14px;border-radius:50%;background:var(--green);border:3px solid var(--bg)}
+h1{font-size:30px;line-height:1.08;letter-spacing:-.03em;margin:0;text-wrap:balance}
+p{margin:0;color:var(--mute);font-size:16px;line-height:1.45}
+.btns{display:flex;flex-direction:column;gap:12px}
+a.b{display:flex;align-items:center;gap:14px;text-decoration:none;border-radius:18px;padding:18px 20px;font-weight:600;font-size:18px;transition:transform .15s}
+a.b:active{transform:scale(.98)}
+a.b small{display:block;font-weight:400;font-size:14px;opacity:.8;margin-top:2px}
+a.g{background:var(--green);color:#fff;box-shadow:0 10px 24px -12px rgba(22,163,74,.7)}
+a.k{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;background:rgba(255,255,255,.18)}
+a.k .ic{background:#fff;border:1px solid var(--line)}
+.pts{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.pts li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--ink)}
+.pts li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:7px;flex:none}
+footer{font-size:13px;color:var(--mute)}
+:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+</style>
+</head>
+<body>
+<main>
+  <div class="logo">P</div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <h1>Recupera horas cada semana en tu negocio</h1>
+    <p>Automatizaciones con inteligencia artificial: asistente de WhatsApp, CRM y agenda que trabajan solos.</p>
+  </div>
+  <div class="btns">
+    <a class="b g" id="agendar" href="https://cal.com/pmotionia/reunion" target="_blank" rel="noopener">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></span>
+      <span>Agendar reunión<small>15 minutos, con tu caso. Gratis.</small></span>
+    </a>
+    <a class="b k" id="info" href="https://wa.me/34684483549?text=Hola%20PmotionIA%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20para%20mi%20negocio" target="_blank" rel="noopener">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 0 1-13.5 7.8L3 21l1.2-4.4A9 9 0 1 1 21 12z"/></svg></span>
+      <span>Más información<small>Escríbenos por WhatsApp</small></span>
+    </a>
+  </div>
+  <ul class="pts">
+    <li>Contestamos a tus clientes al momento, también de noche.</li>
+    <li>Las citas entran solas en tu calendario.</li>
+    <li>Cada mañana sabes a quién llamar.</li>
+  </ul>
+  <footer>PmotionIA · Maresme y Barcelona</footer>
+</main>
+</body>
+</html>
