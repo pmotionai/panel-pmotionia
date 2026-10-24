@@ -105,24 +105,24 @@ async function agenda(){
 async function todoist(b){
   if (!E.TODOIST_TOKEN) throw new Error("Todoist no está conectado (falta TODOIST_TOKEN)");
   const content = String(b.content || "").slice(0, 300); if (!content) throw new Error("Tarea vacía");
-  const r = await fetch("https://api.todoist.com/rest/v2/tasks", { method:"POST", headers:{ "Content-Type":"application/json", Authorization:"Bearer " + E.TODOIST_TOKEN },
+  const r = await fetch("https://api.todoist.com/api/v1/tasks", { method:"POST", headers:{ "Content-Type":"application/json", Authorization:"Bearer " + E.TODOIST_TOKEN },
     body:JSON.stringify({ content, due_string:String(b.due || "hoy"), due_lang:"es", priority:b.prioridad === 1 ? 4 : 1 }) });
   if (!r.ok) throw new Error("Todoist: " + r.status);
   const j = await r.json();
-  return { ok:true, url:j.url };
+  return { ok:true, url:j.url || "https://app.todoist.com/app/task/" + j.id };
 }
 
 async function tareasTodoist(){
   if (!E.TODOIST_TOKEN) return { conectado:false, tareas:[] };
-  const r = await fetch("https://api.todoist.com/rest/v2/tasks?filter=" + encodeURIComponent("today | overdue | 7 days"), { headers:{ Authorization:"Bearer " + E.TODOIST_TOKEN } });
+  const r = await fetch("https://api.todoist.com/api/v1/tasks/filter?query=" + encodeURIComponent("today | overdue | 7 days"), { headers:{ Authorization:"Bearer " + E.TODOIST_TOKEN } });
   if (!r.ok) throw new Error("Todoist: " + r.status);
   const j = await r.json();
-  return { conectado:true, tareas:j.map(x => ({ id:x.id, texto:x.content, fecha:x.due ? (x.due.datetime || x.due.date) : "", prioridad:x.priority, url:x.url })).sort((a, b) => String(a.fecha || "9").localeCompare(String(b.fecha || "9"))) };
+  return { conectado:true, tareas:(j.results || j).map(x => ({ id:x.id, texto:x.content, fecha:x.due ? (x.due.datetime || x.due.date) : "", prioridad:x.priority, url:x.url || "https://app.todoist.com/app/task/" + x.id })).sort((a, b) => String(a.fecha || "9").localeCompare(String(b.fecha || "9"))) };
 }
 async function cerrarTodoist(b){
   if (!E.TODOIST_TOKEN) throw new Error("Todoist no está conectado");
   const id = String(b.id || "").replace(/[^\w]/g, ""); if (!id) throw new Error("Falta la tarea");
-  const r = await fetch("https://api.todoist.com/rest/v2/tasks/" + id + "/close", { method:"POST", headers:{ Authorization:"Bearer " + E.TODOIST_TOKEN } });
+  const r = await fetch("https://api.todoist.com/api/v1/tasks/" + id + "/close", { method:"POST", headers:{ Authorization:"Bearer " + E.TODOIST_TOKEN } });
   if (!r.ok) throw new Error("Todoist: " + r.status);
   return { ok:true };
 }
