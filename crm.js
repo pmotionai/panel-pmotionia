@@ -31,9 +31,28 @@ const RES = {
   "seguimiento": { Estado:"SEGUIMIENTO", nota:"seguimiento", accion:"Seguimiento " },
   "descartar":   { Estado:"DESCARTADO", nota:"descartado" },
 };
+// Cada vendedor ve solo su sector: Raffi las inmobiliarias, Rayan las gestorías y asesorías. Pau, todo.
+// Manda el campo Tipo; el nombre solo cuenta si la ficha no tiene tipo
+const RX_INMO = /inmobil|finques|fincas|real estate|immobil|habitat|llar|home/i, RX_GEST = /gestor|asesor|assessor|tr[aà]mit|consult/i;
+const esInmo = l => RX_INMO.test(l.Tipo || l.Negocio || "");
+const esGest = l => RX_GEST.test(l.Tipo || l.Negocio || "");
+const SECTOR = { Raffi:esInmo, Rayan:esGest };
+const deQuien = (rows, q) => SECTOR[q] ? rows.filter(SECTOR[q]) : rows;
+async function suyo(id, q){
+  if (!SECTOR[q]) return;
+  const l = (await leads()).find(x => x.ID === id);
+  if (!l || !SECTOR[q](l)) throw new Error("Este negocio no está en tu lista");
+}
+// Avisos grandes al abrir la app (avisos.json): { para, desde, hasta, titulo, texto }
+function avisos(q){
+  let a = []; try { a = JSON.parse(fs.readFileSync(path.join(__dirname, "avisos.json"), "utf8")); } catch (e) {}
+  const hoy = madrid(new Date()).slice(0, 10);
+  return { avisos:a.filter(x => (x.para === q || x.para === "todos") && (!x.desde || x.desde <= hoy) && (!x.hasta || hoy <= x.hasta)) };
+}
 async function resultado(b){
   const r = RES[b.resultado], id = String(b.id || "");
   if (!r || !/^L-\d+$/.test(id)) throw new Error("Datos incorrectos");
+  await suyo(id, b.quien);
   const detalle = String(b.detalle || "").slice(0, 300), firma = b.quien && b.quien !== "Pau" ? b.quien + ": " : "";
   const set = { Notas:`+${firma}${r.nota}${detalle ? ": " + detalle : ""}`, Estado:r.Estado };
   if (r.accion) set["Próxima acción"] = r.accion + detalle;
@@ -44,6 +63,7 @@ async function resultado(b){
 async function nota(b){
   const id = String(b.id || ""), t = String(b.texto || "").trim().slice(0, 500);
   if (!/^L-\d+$/.test(id) || !t) throw new Error("Datos incorrectos");
+  await suyo(id, b.quien);
   await hoja({ action:"update", sheet:"leads", find:{ ID:id }, set:{ Notas:"+" + (b.quien && b.quien !== "Pau" ? b.quien + ": " : "") + t } });
   cache.t = 0;
   return { ok:true };
@@ -145,13 +165,14 @@ const conexiones = () => ({ hoja:!!(E.CRM_URL && E.CRM_TOKEN), calendar:!!E.ICS_
 async function handle(req, res, P, send, readBody){
   const ok = p => p.then(d => send(res, 200, d)).catch(e => send(res, 502, { error:String(e.message || e) }));
   if (req.method === "GET"){
-    if (P === "/api/crm/leads") return ok(leads(new URL(req.url, "http://x").searchParams.has("fresh")).then(rows => ({ rows, hoy:madrid(new Date()).slice(0, 10) })));
+    if (P === "/api/crm/leads") return ok(leads(new URL(req.url, "http://x").searchParams.has("fresh")).then(rows => ({ rows:deQuien(rows, req.quien), hoy:madrid(new Date()).slice(0, 10) })));
     if (P === "/api/crm/agenda") return ok(agenda());
     if (P === "/api/crm/metricool") return ok(metricool());
     if (P === "/api/crm/tareas") return ok(tareasTodoist());
     if (P === "/api/crm/correo") return ok(correo());
     if (P === "/api/crm/redes") return ok(redes());
     if (P === "/api/crm/conexiones") return send(res, 200, conexiones());
+    if (P === "/api/crm/avisos") return send(res, 200, avisos(req.quien));
     if (P === "/api/crm/guion-base") return send(res, 200, { texto:leeGuion() });
     return send(res, 404, { error:"no" });
   }
@@ -165,4 +186,4 @@ async function handle(req, res, P, send, readBody){
     send(res, 404, { error:"no" });
   });
 }
-module.exports = { handle, leads, agenda, correo, redes, metricool, tareasTodoist, todoist, nota, resultado, leeGuion, conexiones };
+module.exports = { handle, leads, deQuien, esInmo, esGest, agenda, correo, redes, metricool, tareasTodoist, todoist, nota, resultado, leeGuion, conexiones };

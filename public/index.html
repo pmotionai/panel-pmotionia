@@ -33,6 +33,13 @@ svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .dot{width:8px;height:8px;border-radius:50%;background:var(--mute);flex:none}.dot.v{background:var(--green)}
 .in{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--bg);width:100%;min-width:0;transition:border-color .15s,box-shadow .15s}
 .in:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 4px rgba(10,10,10,.06)}
+#aviso{position:fixed;inset:0;z-index:90;background:rgba(10,10,10,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+#aviso[hidden]{display:none}
+#aviso .caja{background:var(--bg);border-radius:24px;max-width:640px;width:100%;max-height:calc(100dvh - 32px);overflow:auto;padding:28px 26px;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);border-top:8px solid #f59e0b}
+#aviso .k{margin:0;font-weight:700;color:#b45309;font-size:14px;letter-spacing:.02em;text-transform:uppercase}
+#aviso h2{margin:6px 0 14px;font-size:28px;line-height:1.1;letter-spacing:-.03em}
+#aviso h3{font-size:18px;margin:18px 0 6px}#aviso blockquote{margin:6px 0;padding:8px 12px;background:var(--soft);border-left:3px solid var(--ink);border-radius:8px}
+#aviso .btn{margin-top:18px;width:100%;padding:14px;font-size:16px}
 .av{width:44px;height:44px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:600;font-size:15px;letter-spacing:-.02em;flex:none}
 .av.v{background:var(--green)}.av.l{width:72px;height:72px;font-size:24px}.av.s{width:34px;height:34px;font-size:12px}
 
@@ -418,11 +425,15 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
   </div>
 </div>
 <div id="pops" aria-live="polite"></div>
+<div id="aviso" hidden role="dialog" aria-modal="true" aria-labelledby="avisoTit">
+  <div class="caja"><p class="k">⚠️ Aviso de Pau</p><h2 id="avisoTit"></h2><div id="avisoTxt" class="md"></div>
+  <button class="btn k" id="avisoOk">Entendido, a llamar</button></div>
+</div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 var PIN="",LEADS=[],HOY="",SEL=null,CONEX={},FEED={act:[],ord:[],tar:[]},AGENDA=[],TODO=[],POSTS=[],GUION_BASE="";
-var YO=(function(){try{return localStorage.getItem("pm_yo")||(location.pathname=="/raffi"?"Raffi":"Pau")}catch(e){return"Pau"}})();
+var YO=(function(){try{return localStorage.getItem("pm_yo")||(location.pathname=="/raffi"?"Raffi":location.pathname=="/rayan"?"Rayan":"Pau")}catch(e){return"Pau"}})();
 var ORDEN_HOY=[],ORDEN_LISTA=[],ORDEN_FICHA=[],VISTA="tablero",FILTRO="llamar",GTAB="hecho";
 try{PIN=localStorage.getItem("pm_pin")||""}catch(e){}
 var $=function(s){return document.querySelector(s)};
@@ -590,6 +601,7 @@ function generarGuion(l){
   out.push("## ¿Sabéis qué es?");
   out.push("> «¿Sabéis lo que son las automatizaciones con inteligencia artificial?»");
   out.push("- **Si dice que no** → «Básicamente, lo que hago es ahorraros tiempo: automatizo las tareas más tediosas, las que más tiempo os quitan, para que os podáis centrar en las importantes y ser más eficientes.»");
+  out.push("- **Añade siempre** → «Y ojo: no sustituye a nadie ni el trato con vuestros "+S.gente+". Os quita lo repetitivo para que tengáis más tiempo para atenderles en persona.» *(Así te adelantas al «preferimos el trato personal».)*");
   out.push("- **Si dice que sí** → «Perfecto, pues lo que hago es aplicarlas para ahorraros tiempo en las tareas más tediosas, para que os centréis en las importantes.»");
   out.push("## Pregunta cómo lo hacen hoy");
   S.preg.forEach(function(q){out.push("- "+q)});
@@ -614,7 +626,7 @@ function generarGuion(l){
   out.push("## Cierre");
   out.push("> «Lo mejor es que lo veas montado con el caso de **"+N+"**: son 15 minutos. ¿Te va mejor el **"+dias[0]+"** o el **"+dias[1]+"**? ¿Mañana o tarde?»");
   out.push("## Si te dice…");
-  var obj=[["«Ya lo tenemos controlado»","«Genial, entonces vais por delante. Lo que suelo aportar es que lo mismo pase sin que nadie tenga que estar pendiente. En 15 minutos lo ves y decides.»"],["«¿Cuánto cuesta?»","«Es un precio personalizado: depende de qué automaticemos en vuestro caso, así que no te puedo dar una cifra exacta. Por eso prefiero enseñártelo en 15 minutos con vuestro caso.» Y vuelve a la demo."],["«Pero dame una estimación»","«Para que te hagas una idea, desde 1.200 € de puesta en marcha y unos 500 € al mes, sin permanencia. La cifra exacta te la doy cuando veamos qué necesitáis.»"],["«Mándame información»","«Claro, ¿a qué correo? Y mejor aún: 15 minutos y lo ves con el caso de "+N+". ¿"+dias[0]+" o "+dias[1]+"?»"],["«Somos pocos»","«Justo ahí es donde más se nota: cuando sois pocos, cada hora cuenta, y el tiempo que os devuelve va directo a "+(S.k=="salud"?"los pacientes":S.k=="inmo"?"vender":"lo importante")+".»"]];
+  var obj=[["«Ya lo tenemos automatizado»","No discutas: pregunta. «¡Genial, entonces vais por delante! ¿Qué tenéis automatizado exactamente: las respuestas de WhatsApp, las visitas o el seguimiento?» Después: «¿Y qué parte seguís haciendo a mano todavía?» y «Del 1 al 10, ¿cómo de contentos estáis?». Si dice menos de 9: «¿Qué le falta para ser un 10? Eso es justo lo que te enseño en 15 minutos; si lo vuestro es mejor, te lo digo yo mismo.» *(Apunta qué herramienta usan.)*"],["«Preferimos el trato personal / personalizado»","Dale la razón primero: «Totalmente de acuerdo, y eso no lo tocaríamos. Lo que hacemos es quitaros lo repetitivo, lo de «¿sigue disponible?», «¿qué horario tenéis?» o cuadrar una visita, para que tengáis **más tiempo** para el trato personal. Las visitas, las negociaciones y las conversaciones importantes las seguís haciendo vosotros.» Y pregunta: «Si alguien os escribe un domingo a las 11 de la noche, ¿qué crees que prefiere: esperar al lunes o tener respuesta y la visita apuntada? El lunes le llamáis vosotros igual.» *(Apunta su respuesta.)*"],["«Ya lo tenemos controlado»","«Genial, entonces vais por delante. Lo que suelo aportar es que lo mismo pase sin que nadie tenga que estar pendiente. En 15 minutos lo ves y decides.»"],["«¿Cuánto cuesta?»","«Es un precio personalizado: depende de qué automaticemos en vuestro caso, así que no te puedo dar una cifra exacta. Por eso prefiero enseñártelo en 15 minutos con vuestro caso.» Y vuelve a la demo."],["«Pero dame una estimación»","«Para que te hagas una idea, desde 1.200 € de puesta en marcha y unos 500 € al mes, sin permanencia. La cifra exacta te la doy cuando veamos qué necesitáis.»"],["«Mándame información»","«Claro, ¿a qué correo? Y mejor aún: 15 minutos y lo ves con el caso de "+N+". ¿"+dias[0]+" o "+dias[1]+"?»"],["«Somos pocos»","«Justo ahí es donde más se nota: cuando sois pocos, cada hora cuenta, y el tiempo que os devuelve va directo a "+(S.k=="salud"?"los pacientes":S.k=="inmo"?"vender":"lo importante")+".»"]];
   obj.push(["«No tenemos tiempo para montar nada»","«Por eso mismo: lo monto yo. A vosotros os pido 30 minutos y en 7 días está funcionando.»"]);
   obj.push(["«¿Y si no funciona?»","«Por eso primero lo veis con vuestro caso, y no hay permanencia: si no os sirve, lo dejáis.»"]);
   if(S.k=="inmo")obj.push(["«Ya usamos un programa»","«¿Cuál? Muchas veces se conecta con lo que ya tenéis, sin cambiarlo.»"]);
@@ -749,12 +761,12 @@ function pop(t){var box=$("#pops");while(box.children.length>=3)box.removeChild(
   el.onclick=function(){clearInterval(tick);quitar()}}
 function di(t,soloSiAbierto){msg("a",t);if(MODO=="texto"){if($("#vozPanel").hidden||soloSiAbierto===false)pop(t);return}if(!("speechSynthesis" in window))return;speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang="es-ES";if(VOZ.voice)u.voice=VOZ.voice;u.rate=1.04;
   u.onstart=function(){$("#vozBtn").classList.add("habla")};u.onend=function(){$("#vozBtn").classList.remove("habla")};speechSynthesis.speak(u)}
-function abrirVoz(){$("#vozPanel").hidden=false;var hb;try{hb=localStorage.getItem("pm_brief")}catch(e){}if(CEREBRO.ok&&HOY&&hb!=HOY){try{localStorage.setItem("pm_brief",HOY)}catch(e){}setTimeout(function(){preguntaCerebro("Resúmeme en 3 o 4 frases lo más urgente de hoy: llamadas vencidas o con hora, demos, agenda, tareas, correos importantes y plazos de clase. Empieza por lo más importante.")},300)}if(!$("#vozMsgs").children.length){di(CEREBRO.ok?"Hola, Pau. Pregúntame lo que quieras: tu día, un negocio, un precio, cómo responder a un cliente o algo de internet.":"Hola, Pau. Pregúntame qué tienes para hoy, pídeme la siguiente llamada o que abra un negocio.");}}
+function abrirVoz(){$("#vozPanel").hidden=false;if(YO!="Pau"){if(!$("#vozMsgs").children.length)di("Hola, "+YO+". Pregúntame qué decir en una llamada, pídeme la siguiente o dime qué apunto en la ficha"+(CEREBRO.ok?". Si quieres contarle algo a Pau, dímelo y se lo paso.":"."));return}var hb;try{hb=localStorage.getItem("pm_brief")}catch(e){}if(CEREBRO.ok&&HOY&&hb!=HOY){try{localStorage.setItem("pm_brief",HOY)}catch(e){}setTimeout(function(){preguntaCerebro("Resúmeme en 3 o 4 frases lo más urgente de hoy: llamadas vencidas o con hora, demos, agenda, tareas, correos importantes y plazos de clase. Empieza por lo más importante.")},300)}if(!$("#vozMsgs").children.length){di(CEREBRO.ok?"Hola, Pau. Pregúntame lo que quieras: tu día, un negocio, un precio, cómo responder a un cliente o algo de internet.":"Hola, Pau. Pregúntame qué tienes para hoy, pídeme la siguiente llamada o que abra un negocio.");}}
 $("#vozBtn").onclick=function(){if(MODO=="texto"){if($("#vozPanel").hidden){abrirVoz();setTimeout(function(){$("#vozTxt").focus()},50)}else $("#vozPanel").hidden=true;return}if($("#vozPanel").hidden){abrirVoz();escuchar()}else escuchar()};
 $("#vozCerrar").onclick=function(){$("#vozPanel").hidden=true;try{speechSynthesis.cancel()}catch(e){}};
 $("#vozMic").onclick=escuchar;
 $("#vozTxt").onkeydown=function(e){if(e.key=="Enter"&&this.value.trim()){var q=this.value.trim();this.value="";msg("u",q);responder(q)}};
-$("#vozSug").innerHTML=["¿Qué tengo para hoy?","Siguiente llamada","Mis tareas","Lee el guion"].map(function(s){return'<button>'+s+'</button>'}).join("");
+$("#vozSug").innerHTML=(YO=="Pau"?["¿Qué tengo para hoy?","Siguiente llamada","Mis tareas","Lee el guion"]:["Siguiente llamada","¿Y si ya lo tienen automatizado?","¿Y si prefieren el trato personal?","¿Y si me preguntan el precio?"]).map(function(s){return'<button>'+s+'</button>'}).join("");
 $("#vozSug").onclick=function(e){var b=e.target.closest("button");if(b){msg("u",b.textContent);responder(b.textContent)}};
 function escuchar(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){di("Este navegador no me deja escucharte. Ábreme en Chrome o escríbeme abajo.");return}
   try{speechSynthesis.cancel()}catch(e){}
@@ -802,6 +814,11 @@ function responder(q){var n=norm(q),m;
   if(/^(para|calla|silencio|stop|basta)/.test(n)){try{speechSynthesis.cancel()}catch(e){}return}
   var local=/^(siguiente|a quien llamo|proxima llamada|empezamos|empieza)|^(abre|abrir|busca|buscar|ficha de|ensename)\s/.test(n);
   if(CEREBRO.ok&&!local)return preguntaCerebro(q);
+  /* sin cerebro: respuestas fijas a las objeciones y notas en la ficha abierta */
+  if(/automatizad/.test(n))return di("No le discutas: pregúntale. ¿Qué tenéis automatizado exactamente? ¿Qué seguís haciendo a mano? Del 1 al 10, ¿cómo de contentos estáis? Si dice menos de 9: ¿qué le falta para ser un 10? Eso es lo que enseña Pau en 15 minutos.");
+  if(/trato|personal|personaliz/.test(n))return di("Dale la razón: el trato personal no se toca. Quitamos lo repetitivo, como el sigue disponible o cuadrar visitas, para que tengan más tiempo para atender en persona. Y pregúntale: si alguien os escribe un domingo a las 11 de la noche, ¿prefiere esperar al lunes o tener respuesta y la visita apuntada?");
+  if(/precio|cuesta|cuanto vale|estimacion/.test(n))return di("No des cifras: es un precio personalizado según lo que se monte en su caso. Pau se lo enseña en 15 minutos, comparado con lo que el problema les cuesta. ¿Te va mejor el jueves o el viernes?");
+  if((m=n.match(/^(?:apunta|anota|nota)(?:\s+que)?\s+(.+)/))){var fl=LEADS.find(function(z){return z.ID==SEL});if(!fl)return di("Abre primero la ficha del negocio y te lo apunto.");return api("/api/crm/nota",{id:fl.ID,texto:q.replace(/^\s*(apunta|anota|nota)(\s+que)?\s+/i,"")}).then(function(){di("Apuntado en "+fl.Negocio+".");cargar()}).catch(function(e){di("No he podido apuntarlo: "+e.message)})}
   if(/(que|como).*(tengo|hay).*(hoy|dia)|resumen|mi dia|que tengo hoy/.test(n))return di(resumenDia());
   if(/siguiente|a quien llamo|proxima llamada|empezamos|empieza/.test(n)){var p=pendientes()[0];if(!p)return di("No te quedan llamadas pendientes hoy.");abrir(p.ID,ORDEN_HOY);return di("Te abro "+p.Negocio+(p.Zona?", de "+p.Zona:"")+". "+ganchoCorto(p).replace(/[«»]/g,""))}
   if((m=n.match(/(?:abre|abrir|busca|buscar|ficha de|ensename)\s+(?:la ficha de\s+)?(.+)/))){var l=buscaLead(m[1]);if(!l)return di("No encuentro ningún negocio que se llame "+m[1]+".");abrir(l.ID,ORDEN_LISTA.length?ORDEN_LISTA:ORDEN_HOY);return di("Abro "+l.Negocio+". Está en "+estadoTxt(l.Estado).toLowerCase()+(l["Próxima acción"]?". Próxima acción: "+l["Próxima acción"]:"")+".")}
@@ -872,8 +889,14 @@ function start(){
     if(verHola)$("#holaSub").innerHTML="Hoy tienes <b>"+p+" llamada"+(p==1?"":"s")+"</b>"+(c?", <b>"+c+" cita"+(c==1?"":"s")+"</b>":"")+(t?" y <b>"+t+" tarea"+(t==1?"":"s")+"</b>":"")+".";
     if($("#vozAvisos").checked)setTimeout(function(){di(resumenDia())},verHola?3200:600)});
   initPush();
+  setTimeout(verAvisos,verHola?3300:400);
 }
+/* avisos grandes de Pau para el equipo (avisos.json en el servidor): se ven una vez al día hasta pulsar «Entendido» */
+function verAvisos(){api("/api/crm/avisos").then(function(d){var a=(d.avisos||[]).filter(function(x){try{return localStorage.getItem("pm_aviso_"+HOY+"_"+x.titulo)!="1"}catch(e){return true}});if(!a.length)return;var x=a[0];
+  $("#avisoTit").textContent=x.titulo;$("#avisoTxt").innerHTML=md(x.texto||"");$("#aviso").hidden=false;$("#aviso .caja").scrollTop=0;
+  $("#avisoOk").onclick=function(){try{localStorage.setItem("pm_aviso_"+HOY+"_"+x.titulo,"1")}catch(e){}$("#aviso").hidden=true;if(a.length>1)verAvisos()}}).catch(function(){})}
 if(location.pathname=="/raffi"&&!PIN){YO="Raffi";$("#pinTxt").textContent="Hola, Raffi · introduce tu PIN"}
+if(location.pathname=="/rayan"&&!PIN){YO="Rayan";$("#pinTxt").textContent="Hola, Rayan · introduce tu PIN"}
 if(PIN)start();else showPin("");
 </script>
 </body>

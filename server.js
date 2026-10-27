@@ -4,9 +4,9 @@ const http = require("http"), https = require("https"), fs = require("fs"), path
 const PORT = process.env.PORT || 10003;
 const PUB = path.join(__dirname, "public");
 const PIN = process.env.PANEL_PIN || "";
-const RAFFI_PIN = process.env.RAFFI_PIN || "";
-// Quién entra según el PIN: Pau lo ve todo; Raffi solo los leads, el guion y los resultados (sin correo, agenda ni tareas de Pau)
-const quien = p => (PIN && p === PIN) ? "Pau" : (RAFFI_PIN && p === RAFFI_PIN) ? "Raffi" : "";
+const RAFFI_PIN = process.env.RAFFI_PIN || "", RAYAN_PIN = process.env.RAYAN_PIN || "";
+// Quién entra según el PIN: Pau lo ve todo; Raffi (inmobiliarias) y Rayan (gestorías) solo sus leads, el guion, los resultados y su chat
+const quien = p => (PIN && p === PIN) ? "Pau" : (RAFFI_PIN && p === RAFFI_PIN) ? "Raffi" : (RAYAN_PIN && p === RAYAN_PIN) ? "Rayan" : "";
 const VPUB = process.env.VAPID_PUBLIC || "", VPRIV = process.env.VAPID_PRIVATE || "";
 const COLS = ["actividad", "ordenes", "leads", "tareas"];
 let DB = { gen: Date.now().toString(36) }; COLS.forEach(c => DB[c] = {});
@@ -34,6 +34,12 @@ function push(endpoint){
   req.on("error", () => {}); req.end();
 }
 function notify(msg){ for (const [ep, s] of subs){ s.msg = msg; push(ep); } }
+// Un vendedor deja un recado a Pau desde su chat: queda en el feed de actividad y le llega un aviso al móvil
+function avisarPau(de, texto){
+  const t = String(texto || "").trim().slice(0, 500); if (!t) return;
+  DB.actividad["r" + now().toString(36)] = { texto:de + ": " + t, tipo:"recado", ts:new Date().toISOString() };
+  notify({ title:"Recado de " + de, body:t.slice(0, 180), url:"/" });
+}
 
 const send = (res, code, body, type = "application/json") => { res.writeHead(code, { "Content-Type":type, "Cache-Control":"no-store" }); res.end(typeof body === "string" || Buffer.isBuffer(body) ? body : JSON.stringify(body)); };
 const readBody = (req, cb) => { let b = ""; req.on("data", c => { b += c; if (b.length > 4e5) req.destroy(); }); req.on("end", () => { try { cb(JSON.parse(b || "{}")); } catch (e) { cb(null); } }); };
@@ -53,11 +59,11 @@ http.createServer((req, res) => {
     if (Q !== "Pau") {
       if (P === "/api/state") return send(res, 200, { gen:DB.gen, actividad:[], ordenes:[], leads:[], tareas:[] });
       if (/^\/api\/crm\/(correo|agenda|tareas|metricool)$/.test(P)) return send(res, 200, { conectado:false, eventos:[], tareas:[], correos:[], posts:[] });
-      if (!P.startsWith("/api/crm/") || /^\/api\/crm\/todoist/.test(P)) return send(res, 403, { error:"Solo Pau" });
+      if (!(P.startsWith("/api/crm/") || P.startsWith("/api/cerebro/")) || /^\/api\/crm\/todoist/.test(P)) return send(res, 403, { error:"Solo Pau" });
     }
     if (P === "/api/state") return send(res, 200, state());
     if (P.startsWith("/api/crm/")) return require("./crm").handle(req, res, P, send, readBody);
-    if (P.startsWith("/api/cerebro/")) { let c; try { c = require("./cerebro"); } catch (e) { return send(res, 503, { error:"El cerebro no está activado en este servidor" }); } return c.handle(req, res, P, send, readBody); }
+    if (P.startsWith("/api/cerebro/")) { let c; try { c = require("./cerebro"); } catch (e) { return send(res, 503, { error:"El cerebro no está activado en este servidor" }); } return c.handle(req, res, P, send, readBody, { avisarPau }); }
     if (!POST) return send(res, 405, { error:"method" });
     return readBody(req, b => {
       if (!b) return send(res, 400, { error:"json" });
@@ -98,7 +104,7 @@ http.createServer((req, res) => {
     if (s) s.msg = null;
     send(res, 200, m);
   });
-  const file = path.join(PUB, P === "/agenda" ? "agenda.html" : (P === "/" || P === "/raffi") ? "index.html" : path.normalize(decodeURIComponent(P)));
+  const file = path.join(PUB, P === "/agenda" ? "agenda.html" : (P === "/" || P === "/raffi" || P === "/rayan") ? "index.html" : path.normalize(decodeURIComponent(P)));
   if (!file.startsWith(PUB)) return send(res, 403, "no", "text/plain");
   const TYPES = { ".svg":"image/svg+xml", ".css":"text/css; charset=utf-8", ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".webmanifest":"application/manifest+json", ".png":"image/png" };
   fs.readFile(file, (e, d) => e ? send(res, 404, "No encontrado", "text/plain") : send(res, 200, d, TYPES[path.extname(file)] || "application/octet-stream"));
