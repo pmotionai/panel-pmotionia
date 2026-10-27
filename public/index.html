@@ -433,7 +433,9 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
 
 <script>
 var PIN="",LEADS=[],HOY="",SEL=null,CONEX={},FEED={act:[],ord:[],tar:[]},AGENDA=[],TODO=[],POSTS=[],GUION_BASE="";
-var YO=(function(){try{return localStorage.getItem("pm_yo")||(location.pathname=="/raffi"?"Raffi":location.pathname=="/rayan"?"Rayan":"Pau")}catch(e){return"Pau"}})();
+/* /raffi y /rayan mandan sobre lo guardado: si en este navegador había entrado otra persona, se le vuelve a pedir el PIN */
+var YO_RUTA=location.pathname=="/raffi"?"Raffi":location.pathname=="/rayan"?"Rayan":"";
+var YO=(function(){try{var g=localStorage.getItem("pm_yo");if(YO_RUTA&&g!=YO_RUTA){localStorage.removeItem("pm_pin");localStorage.setItem("pm_yo",YO_RUTA)}return YO_RUTA||g||"Pau"}catch(e){return YO_RUTA||"Pau"}})();
 var ORDEN_HOY=[],ORDEN_LISTA=[],ORDEN_FICHA=[],VISTA="tablero",FILTRO="llamar",GTAB="hecho";
 try{PIN=localStorage.getItem("pm_pin")||""}catch(e){}
 var $=function(s){return document.querySelector(s)};
@@ -878,7 +880,7 @@ function showPin(m){$("#pin").classList.add("on");$("#pinerr").textContent=m||""
 $("#pinok").onclick=function(){PIN=$("#pinin").value.trim();fetch("/api/state",{headers:{"x-pin":PIN}}).then(function(r){if(r.status!=200)throw 0;try{localStorage.setItem("pm_pin",PIN)}catch(e){}$("#pin").classList.remove("on");start()}).catch(function(){showPin("PIN incorrecto")})};
 $("#pinin").onkeydown=function(e){if(e.key=="Enter")$("#pinok").click()};
 function start(){
-  api("/api/yo").then(function(d){if(d.nombre&&d.nombre!=YO){YO=d.nombre;try{localStorage.setItem("pm_yo",YO)}catch(e){}pintarTodo()}}).catch(function(){});
+  api("/api/yo").then(function(d){if(YO_RUTA&&d.nombre&&d.nombre!=YO_RUTA){try{localStorage.removeItem("pm_pin")}catch(e){}PIN="";showPin("Ese PIN no es de "+YO_RUTA);return}if(d.nombre&&d.nombre!=YO){YO=d.nombre;try{localStorage.setItem("pm_yo",YO)}catch(e){}pintarTodo()}}).catch(function(){});
   var verHola=true;try{verHola=sessionStorage.getItem("pm_hola")!="1";sessionStorage.setItem("pm_hola","1")}catch(e){}
   if(verHola)bienvenida();
   api("/api/crm/conexiones").then(function(c){for(var k in c)CONEX[k]=c[k];pintarConex()}).catch(function(){});
