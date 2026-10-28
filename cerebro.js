@@ -35,7 +35,7 @@ Cómo respondes:
 Lo que sabes del negocio (memoria, precios, guiones, cliente ideal):
 ${contexto() || "(sin contexto cargado)"}`;
 
-const SECTOR_TXT = { Raffi:"inmobiliarias independientes del Maresme", Rayan:"gestorías y asesorías del Maresme" };
+const SECTOR_TXT = { Raffi:"inmobiliarias independientes del Maresme", Rayan:"gestorías, asesorías y clínicas de fisioterapia del Maresme" };
 const SISTEMA_EQUIPO = q => `Eres el asistente de ${q} dentro del CRM de PmotionIA. ${q} es vendedor de PmotionIA: llama a ${SECTOR_TXT[q] || "negocios"} para conseguir reuniones de 15 minutos con Pau. No cierra ventas ni da precios.
 
 Qué es PmotionIA: ayudamos a negocios pequeños a recuperar horas cada semana quitándoles lo repetitivo (contestar el WhatsApp, cuadrar visitas o citas, pedir papeles, recordar a quién llamar). Al cliente se le habla de lo que gana (tiempo, clientes, tranquilidad), nunca de tecnología ni de «agentes».

@@ -36,7 +36,10 @@ const RES = {
 const RX_INMO = /inmobil|finques|fincas|real estate|immobil|habitat|llar|home/i, RX_GEST = /gestor|asesor|assessor|tr[aà]mit|consult/i;
 const esInmo = l => RX_INMO.test(l.Tipo || l.Negocio || "");
 const esGest = l => RX_GEST.test(l.Tipo || l.Negocio || "");
-const SECTOR = { Raffi:esInmo, Rayan:esGest };
+// Desde 28/10/2026 Rayan también llama a clínicas de fisioterapia y salud (nicho nuevo, más fácil)
+const RX_SALUD = /fisio|osteo|podo|quiro|cl[ií]nica/i;
+const esSalud = l => RX_SALUD.test(l.Tipo || l.Negocio || "");
+const SECTOR = { Raffi:esInmo, Rayan: l => esGest(l) || esSalud(l) };
 const deQuien = (rows, q) => SECTOR[q] ? rows.filter(SECTOR[q]) : rows;
 async function suyo(id, q){
   if (!SECTOR[q]) return;
