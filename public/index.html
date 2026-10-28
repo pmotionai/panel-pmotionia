@@ -559,6 +559,7 @@ function ganchoCorto(l){
   if(/whatsapp enviado/i.test(l.Notas||"")&&!/contest[oó] (?!con respuesta autom)/i.test(l.Notas||""))return"«Te escribí por WhatsApp hace unos días, te llamo por eso en concreto.»";
   if(esInmo(l))return"«¿Los contactos que os llegan de noche o en fin de semana, quién los contesta?»";
   if(esGest(l))return"«¿Cuántas veces al día os preguntan lo mismo por WhatsApp?»";
+  if(/fisio|osteo|podo/i.test((l.Tipo||"")+" "+l.Negocio))return"«Ayudamos a clínicas de fisioterapia a que sus pacientes no falten a la cita, con recordatorios por WhatsApp.»";
   return"«Te llamo por una cosa concreta de vuestro negocio, te robo un minuto.»";
 }
 /* Guion de venta por resultado: no suponemos su problema, contamos lo que consiguen y preguntamos cómo lo hacen hoy */
@@ -573,11 +574,11 @@ function sector(l){var t=(l.Tipo||"")+" "+l.Negocio;
     preg:["«¿Cómo os organizáis ahora para pedir la documentación a los clientes?»","«Y las consultas que llegan por WhatsApp o teléfono, ¿quién las atiende?»"],
     cons:[["Avisos automáticos","cada cliente recibe qué tiene que mandar y cuándo. **Dejáis de perder tiempo persiguiendo papeles.**"],["Asistente de WhatsApp","responde las preguntas de siempre al momento. **Horas libres cada semana para el equipo.**"],["CRM con avisos","cada cliente y cada trámite con su fecha. **Sin tiempo perdido repasando vencimientos.**"]],
     hora:"Mejor hora: 8:00–9:30. Evita del 10 al 20 de enero, abril, julio y octubre."};
-  if(/fisio|osteo|cl[ií]nica|dent|psic|podo|nutri/i.test(t))return{k:"salud",coste:"«¿Cuántas llamadas o mensajes os entran mientras estáis con pacientes?»",numeros:"«Si de esas llamadas se os escapa **un paciente nuevo a la semana**, al año son muchos tratamientos que se van a otro centro. ¿Lo ves así?»",nom:/fisio/i.test(t)?"centro de fisioterapia":"clínica",plural:"clínicas y centros de salud",gente:"pacientes",
-    resultado:"que recuperéis horas cada semana: dejar de coger el teléfono entre sesiones, de dar citas por WhatsApp y de llamar para recordarlas. Ese tiempo vuelve a los pacientes",
-    preg:["«Cuando estáis en plena sesión y suena el teléfono, ¿cómo lo hacéis?»","«¿Cómo gestionáis ahora las anulaciones de última hora?»"],
-    cons:[["Asistente de voz y WhatsApp","atiende, resuelve dudas y da cita. **No interrumpís más sesiones para coger el teléfono.**"],["Calendario y recordatorios","la cita entra sola y el paciente recibe aviso el día antes. **Ni una llamada más para recordar citas.**"],["CRM","sabéis quién dejó el tratamiento a medias. **Recuperar pacientes sin dedicarle horas.**"]],
-    hora:"Mejor hora: a primera hora o justo antes de comer, entre sesiones."};
+  if(/fisio|osteo|cl[ií]nica|dent|psic|podo|nutri/i.test(t))return{k:"salud",coste:"«Más o menos, ¿cuántos pacientes al mes no vienen sin avisar?» y «¿Cuánto vale una sesión, de media?»",numeros:"«A ver si lo he entendido: se os pierden unas **[X] citas al mes**, y cada sesión son unos **[Y] €**. Son **[X × Y] € al mes** que no entran, **[× 12] € al año**, además del hueco que se queda vacío. ¿Lo ves así?» *(Usa SUS números; si no sabe cuántas son: «¿una a la semana? ¿dos?».)*",nom:/fisio/i.test(t)?"centro de fisioterapia":"clínica",plural:"clínicas de fisioterapia y salud",gente:"pacientes",
+    resultado:"que vuestros pacientes no falten a la cita: recordatorios por WhatsApp, confirmación en un mensaje y horas libres para vosotros. Ese tiempo y esos huecos vuelven a los pacientes",
+    preg:["«¿Cómo recordáis las citas a los pacientes: llamáis, mandáis mensaje o no se recuerdan?»","«Cuando se os cancela una cita a última hora, ¿cómo rellenáis ese hueco?»","«Si estás con un paciente y te llega un WhatsApp para pedir hora, ¿quién lo contesta?»"],
+    cons:[["Recordatorio por WhatsApp","cada paciente recibe el día antes su día y hora, y puede confirmar o cambiar la cita con un mensaje. **Menos plantones y menos llamadas para recordar citas.**"],["Aviso de huecos","si alguien cancela, lo sabéis al instante para ofrecer el hueco a otro paciente. **Menos horas vacías en la agenda.**"],["Asistente de WhatsApp","contesta al momento las dudas de siempre (horarios, tarifas, cómo llegar) y propone hora, con vuestro tono. **No interrumpís sesiones para contestar.**"],["CRM con avisos","cada mañana sabéis a quién llamar: quién dejó el tratamiento a medias o le toca revisión. **Recuperar pacientes sin dedicarle horas.**"]],
+    hora:"Mejor hora: 9:00–10:00 o 15:00–16:00, entre sesiones. Anota en qué franja contesta cada clínica. Frase de venta: «que tus pacientes no falten a la cita». Nunca hables de datos clínicos: solo se envía día y hora de la cita."};
   return{k:"otro",coste:"«¿Cuántos clientes os escriben o llaman a la semana, más o menos?»",numeros:"«Si se os escapa **uno a la semana**, al año son muchos clientes. ¿Lo ves así?»",nom:(l.Tipo||"negocio").toLowerCase(),plural:"negocios como el vuestro",gente:"clientes",
     resultado:"que recuperéis horas cada semana: dejar de contestar lo mismo y de perseguir seguimientos a mano. Ese tiempo vuelve a lo que de verdad hace crecer el negocio",
     preg:["«¿Cómo os llegan ahora los clientes y quién los atiende?»"],
@@ -632,7 +633,13 @@ function generarGuion(l){
   obj.push(["«No tenemos tiempo para montar nada»","«Por eso mismo: lo monto yo. A vosotros os pido 30 minutos y en 7 días está funcionando.»"]);
   obj.push(["«¿Y si no funciona?»","«Por eso primero lo veis con vuestro caso, y no hay permanencia: si no os sirve, lo dejáis.»"]);
   if(S.k=="inmo")obj.push(["«Ya usamos un programa»","«¿Cuál? Muchas veces se conecta con lo que ya tenéis, sin cambiarlo.»"]);
-  if(S.k=="gest"||S.k=="salud")obj.push(["«¿Y la protección de datos?»","«Buena pregunta: en la demo te enseño dónde quedan los datos y cómo se cumple el RGPD.»"]);
+  if(S.k=="gest")obj.push(["«¿Y la protección de datos?»","«Buena pregunta: en la demo te enseño dónde quedan los datos y cómo se cumple el RGPD.»"]);
+  if(S.k=="salud"){
+    obj.push(["«¿Y los datos de los pacientes? Son datos de salud»","«Muy buena pregunta. Solo se envía el día y la hora de la cita, nunca nada clínico. En la demo te enseño dónde queda cada dato y cómo se cumple el RGPD.»"]);
+    obj.push(["«Ya uso un programa de citas» (Doctoralia, Clinic Cloud, Reservio…)","«Perfecto, ¿cuál? Va encima, sin cambiar nada: el recordatorio sale por WhatsApp.»"]);
+    obj.push(["«Ya mando recordatorios (SMS o email)»","«¿Y los pacientes os contestan? Por WhatsApp suelen confirmar o cambiar la cita en el momento.»"]);
+    obj.push(["«Trabajo yo solo»","«Justo a las clínicas pequeñas es a las que más ayuda: cada cita perdida pesa más y no hay quien llame.»"]);
+  }
   if(/cadena|franquicia|grocasa|tecnocasa|donpiso|urbenia/i.test(N+txt))obj.unshift(["«Eso lo decide la central»","«Lo entiendo. ¿Quién de la central lleva estos temas? Os preparo la demo para que se la enseñéis.»"]);
   obj.forEach(function(o){out.push("- **"+o[0]+"** → "+o[1])});
   return out.join("\n");
