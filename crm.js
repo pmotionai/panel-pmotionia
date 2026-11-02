@@ -56,7 +56,7 @@ async function resultado(b){
   const r = RES[b.resultado], id = String(b.id || "");
   if (!r || !/^L-\d+$/.test(id)) throw new Error("Datos incorrectos");
   await suyo(id, b.quien);
-  const detalle = String(b.detalle || "").slice(0, 300), firma = b.quien && b.quien !== "Pau" ? b.quien + ": " : "";
+  const detalle = String(b.detalle || "").slice(0, 300), hora = madrid(new Date()).slice(11, 16), firma = (b.quien && b.quien !== "Pau" ? b.quien + " · " : "") + hora + ": ";
   const set = { Notas:`+${firma}${r.nota}${detalle ? ": " + detalle : ""}`, Estado:r.Estado };
   if (r.accion) set["Próxima acción"] = r.accion + detalle;
   await hoja({ action:"update", sheet:"leads", find:{ ID:id }, set });
@@ -67,7 +67,7 @@ async function nota(b){
   const id = String(b.id || ""), t = String(b.texto || "").trim().slice(0, 500);
   if (!/^L-\d+$/.test(id) || !t) throw new Error("Datos incorrectos");
   await suyo(id, b.quien);
-  await hoja({ action:"update", sheet:"leads", find:{ ID:id }, set:{ Notas:"+" + (b.quien && b.quien !== "Pau" ? b.quien + ": " : "") + t } });
+  await hoja({ action:"update", sheet:"leads", find:{ ID:id }, set:{ Notas:"+" + (b.quien && b.quien !== "Pau" ? b.quien + " · " : "") + madrid(new Date()).slice(11, 16) + ": " + t } });
   cache.t = 0;
   return { ok:true };
 }
