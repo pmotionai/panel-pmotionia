@@ -609,8 +609,16 @@ function generarGuion(l){
   antes.forEach(function(x){out.push("- "+x)});
   out.push("## Apertura");
   out.push("**Nunca digas «especialista en automatizaciones», «inteligencia artificial» ni nada parecido al presentarte: es lo que hace que cuelguen antes de escuchar. Di siempre esta, tal cual:**");
+  if(S.k=="salud"){
+    out.push("> «Hola, què tal? Em dic **"+YO+"**. Truco en un mal moment?»");
+    out.push("*(Espera que respongui.)*");
+    out.push("> «Mira, treballo en el sector de la fisioteràpia i us vinc a fer una proposta que crec que us aniria súper bé. "+(email?"Us vaig enviar el correu que em vau demanar. ":wa?"Us vaig escriure per WhatsApp fa uns dies. ":"")+"Tens un minut?»");
+    out.push("En castellano: «Hola, ¿qué tal? Me llamo **"+YO+"**. ¿Te pillo en mal momento?» *(espera)* «Mira, trabajo en el sector de la fisioterapia y os vengo a hacer una propuesta que creo que os iría súper bien. ¿Tienes un minuto?»");
+    out.push("*(Si de verdad le va mal: «¿Cuándo te viene mejor?» y lo apuntas.)*");
+  }else{
   out.push("> «Buenos días, ¿hablo con **"+N+"**? Soy "+YO+", de PmotionIA. Ayudamos a "+S.plural+" a "+S.promesa+". "+(email?"Os envié el correo que me pedisteis, os llamo para comentarlo. ":wa?"Os escribí por WhatsApp hace unos días. ":"")+"Te llamo por una cosa concreta. ¿Te pillo en mal momento, prefieres que te llame luego?»");
   out.push("*(No pidas permiso con «¿tienes un minuto?»: invita a decir que no. Dale la opción de colgar y, por educación, casi siempre sigue hablando. Si de verdad le va mal: «¿Cuándo te viene mejor?» y lo apuntas.)*");
+  }
   out.push("**Si aun así dice «no me interesa» muy rápido, sin dejarte explicar** (frase de rescate, una sola vez): «Lo entiendo, solo una cosa antes de colgar: "+S.rescate+"» Si contesta, sigues con las preguntas. Si insiste, lo dejas y apuntas el motivo.");
   out.push("## ¿Sabéis qué es?");
   out.push("> «¿Sabéis lo que son las automatizaciones con inteligencia artificial?»");
@@ -690,6 +698,7 @@ function abrir(id,orden){
   $("#fNombre").textContent=l.Negocio;$("#fAv").textContent=iniciales(l.Negocio);$("#fAv").className="av l"+(caliente(l)?" v":"");
   $("#fChips").innerHTML=[[estadoTxt(l.Estado),caliente(l)?"v":"k"],[l.Tipo],[l.Zona],[l["Nota Google"]?"★ "+String(l["Nota Google"]).replace(".",",")+(l["Reseñas"]?" · "+l["Reseñas"]+" reseñas":""):""],[l.Prioridad]].filter(function(c){return c[0]}).map(function(c){return'<span class="chip '+(c[1]||"")+'">'+esc(c[0])+'</span>'}).join("");
   $("#fChips").insertAdjacentHTML("afterbegin",chipAbierto(l));
+  if(/⚠️/.test(l["Próxima acción"]||"")){var nf=notasDe(l);$("#avisoTit").textContent="Vuelve a llamar a "+l.Negocio;$("#avisoTxt").innerHTML=md("**"+String(l["Próxima acción"]).replace(/⚠️\s*/,"")+"**"+(nf.length?"\n\nÚltima nota: «"+nf[nf.length-1].slice(0,160)+"»":""));$("#aviso").hidden=false;$("#aviso .caja").scrollTop=0;$("#avisoOk").onclick=function(){$("#aviso").hidden=true}}
   var t=telD(l["Teléfono"]),web=String(l["Web actual"]||""),dom=(web.match(/([a-z0-9-]+\.)+[a-z]{2,}/i)||[""])[0],q=encodeURIComponent(l.Negocio+" "+(l.Zona||""));
   $("#fAcc").innerHTML=(t?'<a class="btn g" href="tel:+34'+t+'">'+ico("tel")+'Llamar · '+esc(tel(t))+'</a><a class="btn" target="_blank" rel="noopener" href="https://wa.me/34'+t+'?text='+encodeURIComponent("Hola, soy Pau, de PmotionIA 👋 ")+'">'+ico("wa")+'WhatsApp</a>':"")
     +'<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/'+q+'">'+ico("map")+'Maps</a>'
