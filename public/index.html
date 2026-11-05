@@ -474,7 +474,7 @@ function tipoLlamada(l){var pa=String(l["Próxima acción"]||"");
   return l.Estado=="VOLVER A LLAMAR"||antes?"vol":"nuevo"}
 function chipTipo(l){var t=tipoLlamada(l);return'<span class="chip'+(t=="nuevo"?" v":t=="seg"?" k":" r")+'">'+TIPO_TXT[t]+'</span>'}
 function esDeHoy(l){return(fechaDe(l)==HOY&&(EN_COLA.indexOf(l.Estado)>=0||l.Estado=="SEGUIMIENTO"))}
-function llamadasHoy(){var h=hechasHoy();return LEADS.filter(function(l){return esDeHoy(l)||h.indexOf(l)>=0})}
+function llamadasHoy(){return LEADS.filter(esDeHoy)} /* solo las que quedan por llamar hoy */
 function demosHoy(){return LEADS.filter(function(l){return l.Estado=="REUNIÓN"&&fechaDe(l)==HOY})}
 function pintarTodo(){pintarHoy();pintarClientes()}
 
