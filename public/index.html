@@ -436,7 +436,7 @@ var PIN="",LEADS=[],HOY="",SEL=null,CONEX={},FEED={act:[],ord:[],tar:[]},AGENDA=
 /* /raffi y /rayan mandan sobre lo guardado: si en este navegador había entrado otra persona, se le vuelve a pedir el PIN */
 var YO_RUTA=location.pathname=="/raffi"?"Raffi":location.pathname=="/rayan"?"Rayan":"";
 var YO=(function(){try{var g=localStorage.getItem("pm_yo");if(YO_RUTA&&g!=YO_RUTA){localStorage.removeItem("pm_pin");localStorage.setItem("pm_yo",YO_RUTA)}return YO_RUTA||g||"Pau"}catch(e){return YO_RUTA||"Pau"}})();
-var ORDEN_HOY=[],ORDEN_LISTA=[],ORDEN_FICHA=[],VISTA="tablero",FILTRO="llamar",GTAB="hecho";
+var ORDEN_HOY=[],ORDEN_LISTA=[],ORDEN_FICHA=[],VISTA="tablero",FILTRO="hoy",GTAB="hecho";
 try{PIN=localStorage.getItem("pm_pin")||""}catch(e){}
 var $=function(s){return document.querySelector(s)};
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML}
@@ -461,17 +461,27 @@ function esGest(l){return/gestor|asesor|assessor|tr[aà]mit|consult/i.test((l.Ti
 
 /* ---------- datos ---------- */
 function cargar(fresh){return api("/api/crm/leads"+(fresh?"?fresh=1":"")).then(function(d){LEADS=(d.rows||[]).filter(function(l){return!VIEJO.test(l.Tipo||"")}); /* peluquerías y estéticas (nicho antiguo) fuera de la app; siguen en la hoja */HOY=d.hoy;pintarTodo();return d})}
-function pendientes(){return LEADS.filter(function(l){return EN_COLA.indexOf(l.Estado)>=0&&!VIEJO.test(l.Tipo||"")&&(fechaDe(l)?fechaDe(l)<=HOY:l.Estado!="CON FECHA")})
+function pendientes(){return LEADS.filter(function(l){return(EN_COLA.indexOf(l.Estado)>=0&&!VIEJO.test(l.Tipo||"")&&(fechaDe(l)?fechaDe(l)<=HOY:l.Estado!="CON FECHA"))||(l.Estado=="SEGUIMIENTO"&&fechaDe(l)&&fechaDe(l)<=HOY&&/llamar/i.test(l["Próxima acción"]||""))})
   .sort(function(a,b){var fa=fechaDe(a)||"9",fb=fechaDe(b)||"9";if(fa!=fb)return fa<fb?-1:1;return(horaDe(a)||"99").localeCompare(horaDe(b)||"99")})}
 var RX_HECHA=null;
-function hechasHoy(){var rx=new RegExp(HOY+": (no contesta|no le interesa|volver a llamar|demo agendada|interesado|seguimiento|descartado)");return LEADS.filter(function(l){return rx.test(String(l.Notas||""))})}
+function hechasHoy(){var rx=new RegExp(HOY+": (?:[^:·]+ · \\d{1,2}:\\d{2}: )?(no contesta|no le interesa|volver a llamar|demo agendada|interesado|seguimiento|descartado)");return LEADS.filter(function(l){return rx.test(String(l.Notas||""))})}
+/* Tipo de llamada: la rutina «hola» lo marca con [NUEVO], [VOLVER A LLAMAR] o [SEGUIMIENTO] al principio de la próxima acción; si no hay marca, se deduce */
+var TIPO_TXT={nuevo:"Nuevo",vol:"Volver a llamar",seg:"Volver a llamar (seguimiento)"};
+function tipoLlamada(l){var pa=String(l["Próxima acción"]||"");
+  if(/^\s*\[seguimiento\]/i.test(pa))return"seg";if(/^\s*\[volver a llamar\]/i.test(pa))return"vol";if(/^\s*\[nuevo\]/i.test(pa))return"nuevo";
+  if(l.Estado=="SEGUIMIENTO")return"seg";
+  var antes=String(l.Notas||"").split(" · ").some(function(s){var m=s.match(/^(\d{4}-\d{2}-\d{2}): (?:[^:·]+ · \d{1,2}:\d{2}: )?(no contesta|volver a llamar)/i);return m&&m[1]<HOY});
+  return l.Estado=="VOLVER A LLAMAR"||antes?"vol":"nuevo"}
+function chipTipo(l){var t=tipoLlamada(l);return'<span class="chip'+(t=="nuevo"?" v":t=="seg"?" k":" r")+'">'+TIPO_TXT[t]+'</span>'}
+function esDeHoy(l){return(fechaDe(l)==HOY&&(EN_COLA.indexOf(l.Estado)>=0||l.Estado=="SEGUIMIENTO"))}
+function llamadasHoy(){var h=hechasHoy();return LEADS.filter(function(l){return esDeHoy(l)||h.indexOf(l)>=0})}
 function demosHoy(){return LEADS.filter(function(l){return l.Estado=="REUNIÓN"&&fechaDe(l)==HOY})}
 function pintarTodo(){pintarHoy();pintarClientes()}
 
 /* ---------- tarjeta de lead ---------- */
 function tarjeta(l,lista){var f=fechaDe(l),h=horaDe(l),tarde=f&&f<HOY;
   var cuando=f?(f==HOY?"Hoy"+(h?" · "+h:""):dm(f)+(h?" · "+h:"")):"";
-  return'<button class="lc'+(caliente(l)?" hot":"")+'" data-id="'+esc(l.ID)+'" data-lista="'+lista+'"><span class="top"><span class="av'+(caliente(l)?" v":"")+'">'+esc(iniciales(l.Negocio))+'</span><span style="min-width:0"><span class="n">'+esc(l.Negocio)+'</span><span class="s">'+esc([l.Tipo,l.Zona].filter(Boolean).join(" · "))+'</span></span></span>'
+  return'<button class="lc'+(caliente(l)?" hot":"")+'" data-id="'+esc(l.ID)+'" data-lista="'+lista+'"><span class="top"><span class="av'+(caliente(l)?" v":"")+'">'+esc(iniciales(l.Negocio))+'</span><span style="min-width:0"><span class="n">'+esc(l.Negocio)+'</span><span class="s">'+esc([l.Tipo,l.Zona].filter(Boolean).join(" · "))+'</span>'+(esDeHoy(l)?'<span style="display:block;margin-top:4px">'+chipTipo(l)+'</span>':'')+'</span></span>'
    +'<span class="meta"><span class="estrella">'+(l["Nota Google"]?"★ "+String(l["Nota Google"]).replace(".",",")+(l["Reseñas"]?" · "+l["Reseñas"]:""):esc(tel(l["Teléfono"])))+'</span>'+(cuando?'<span class="cuando'+(tarde?" tarde":"")+'">'+(tarde?"Atrasada · ":"")+esc(cuando)+'</span>':'<span class="chip">'+esc(estadoTxt(l.Estado))+'</span>')+'</span></button>'}
 
 /* ---------- HOY ---------- */
@@ -505,9 +515,9 @@ function cargarAgenda(){return api("/api/crm/agenda").then(function(d){AGENDA=d.
 function cargarContenido(){return api("/api/crm/metricool").then(function(d){if(!d.conectado)return;POSTS=d.posts||[];$("#bloqueContenido").hidden=false;$("#contenido").innerHTML=POSTS.map(function(p){var f=String(p.fecha);return'<div class="e"><span class="h">'+esc(dm(f.slice(0,10)))+'</span><span class="p"><i class="v"></i></span><span style="min-width:0"><span class="t" style="display:block">'+esc(p.texto||"(sin texto)")+'</span><span class="s" style="display:block">'+esc(f.slice(11,16)+" · "+p.redes)+'</span></span></div>'}).join("")||'<div class="vacio">No hay publicaciones programadas.</div>'}).catch(function(){})}
 
 /* ---------- CLIENTES ---------- */
-var COLS=[["Para llamar",function(l){return EN_COLA.indexOf(l.Estado)>=0&&!VIEJO.test(l.Tipo||"")}],["Seguimiento",function(l){return l.Estado=="SEGUIMIENTO"}],["Interesados",function(l){return l.Estado=="INTERESADO"}],["Demos",function(l){return l.Estado=="REUNIÓN"}],["Clientes",function(l){return l.Estado=="CLIENTE"}]];
-var FILTROS=[["llamar","Para llamar"],["seguimiento","Seguimiento"],["interesados","Interesados y demos"],["nuevos","Nuevos"],["todos","Todos"],["cerrados","Descartados"]];
-function filtra(l){var e=l.Estado;switch(FILTRO){case"llamar":return EN_COLA.indexOf(e)>=0&&!VIEJO.test(l.Tipo||"");case"seguimiento":return e=="SEGUIMIENTO";case"interesados":return caliente(l);case"nuevos":return e=="NUEVO"||e=="VISITAR";case"cerrados":return e=="DESCARTADO"||e=="NO INTERESADO"||e=="APARCADO";default:return true}}
+var COLS=[["Llamadas de hoy",function(l){return llamadasHoy().indexOf(l)>=0}],["Para llamar",function(l){return EN_COLA.indexOf(l.Estado)>=0&&!VIEJO.test(l.Tipo||"")&&!esDeHoy(l)}],["Seguimiento",function(l){return l.Estado=="SEGUIMIENTO"&&!esDeHoy(l)}],["Interesados",function(l){return l.Estado=="INTERESADO"}],["Demos",function(l){return l.Estado=="REUNIÓN"}],["Clientes",function(l){return l.Estado=="CLIENTE"}]];
+var FILTROS=[["hoy","Llamadas de hoy"],["llamar","Para llamar"],["seguimiento","Seguimiento"],["interesados","Interesados y demos"],["nuevos","Nuevos"],["todos","Todos"],["cerrados","Descartados"]];
+function filtra(l){var e=l.Estado;switch(FILTRO){case"hoy":return llamadasHoy().indexOf(l)>=0;case"llamar":return EN_COLA.indexOf(e)>=0&&!VIEJO.test(l.Tipo||"");case"seguimiento":return e=="SEGUIMIENTO";case"interesados":return caliente(l);case"nuevos":return e=="NUEVO"||e=="VISITAR";case"cerrados":return e=="DESCARTADO"||e=="NO INTERESADO"||e=="APARCADO";default:return true}}
 function orden(a,b){var fa=fechaDe(a)||"9",fb=fechaDe(b)||"9";if(fa!=fb)return fa<fb?-1:1;var ha=horaDe(a)||"99",hb=horaDe(b)||"99";return ha==hb?String(a.Negocio).localeCompare(String(b.Negocio)):ha<hb?-1:1}
 function busca(l){var q=$("#busca").value.toLowerCase().trim();return!q||[l.Negocio,l.Zona,l.Tipo,l["Teléfono"],l.Notas].join(" ").toLowerCase().indexOf(q)>=0}
 function pintarClientes(){
@@ -609,7 +619,12 @@ function generarGuion(l){
   antes.forEach(function(x){out.push("- "+x)});
   out.push("## Apertura");
   out.push("**Nunca digas «especialista en automatizaciones», «inteligencia artificial» ni nada parecido al presentarte: es lo que hace que cuelguen antes de escuchar. Di siempre esta, tal cual:**");
-  if(S.k=="salud"){
+  if(tipoLlamada(l)=="seg"){
+    out.push("**Volver a llamar (seguimiento):** ya hablasteis o le escribisteis y no ha contestado. Preséntate, recuérdaselo y ve directo a la reunión.");
+    if(S.k=="salud")out.push("> «Hola, què tal? Em dic **"+YO+"**, de PmotionIA. Et vaig trucar fa poc i no he rebut resposta. "+(email?"Us vaig enviar el correu que em vau demanar. ":wa?"Us vaig escriure per WhatsApp. ":"")+"El millor seria fer una reunió telemàtica de 15 minuts per veure el vostre cas. Et va millor el "+dias[0]+" o el "+dias[1]+"?»");
+    out.push((S.k=="salud"?"En castellano: ":"")+"«Hola, ¿qué tal? Me llamo **"+YO+"**, de PmotionIA. Te llamé hace poco y no he recibido contestación. "+(email?"Os envié el correo que me pedisteis. ":wa?"Os escribí por WhatsApp. ":"")+"Lo mejor sería hacer una reunión telemática de 15 minutos para ver vuestro caso. ¿Te va mejor el "+dias[0]+" o el "+dias[1]+"?»");
+    out.push("*(Si dice que sí: apunta día y hora en el CRM. Si prefiere que le expliques antes, sigue con las preguntas de abajo.)*");
+  }else if(S.k=="salud"){
     out.push("> «Hola, què tal? Em dic **"+YO+"**. Truco en un mal moment?»");
     out.push("*(Espera que respongui.)*");
     out.push("> «Mira, treballo en el sector de la fisioteràpia i us vinc a fer una proposta que crec que us aniria súper bé. "+(email?"Us vaig enviar el correu que em vau demanar. ":wa?"Us vaig escriure per WhatsApp fa uns dies. ":"")+"Tens un minut?»");
@@ -697,8 +712,8 @@ function abrir(id,orden){
   var l=LEADS.find(function(x){return x.ID==id});if(!l)return;SEL=id;if(orden)ORDEN_FICHA=orden;
   $("#fNombre").textContent=l.Negocio;$("#fAv").textContent=iniciales(l.Negocio);$("#fAv").className="av l"+(caliente(l)?" v":"");
   $("#fChips").innerHTML=[[estadoTxt(l.Estado),caliente(l)?"v":"k"],[l.Tipo],[l.Zona],[l["Nota Google"]?"★ "+String(l["Nota Google"]).replace(".",",")+(l["Reseñas"]?" · "+l["Reseñas"]+" reseñas":""):""],[l.Prioridad]].filter(function(c){return c[0]}).map(function(c){return'<span class="chip '+(c[1]||"")+'">'+esc(c[0])+'</span>'}).join("");
-  $("#fChips").insertAdjacentHTML("afterbegin",chipAbierto(l));
-  if(/⚠️/.test(l["Próxima acción"]||"")){var nf=notasDe(l);$("#avisoTit").textContent="Vuelve a llamar a "+l.Negocio;$("#avisoTxt").innerHTML=md("**"+String(l["Próxima acción"]).replace(/⚠️\s*/,"")+"**"+(nf.length?"\n\nÚltima nota: «"+nf[nf.length-1].slice(0,160)+"»":""));$("#aviso").hidden=false;$("#aviso .caja").scrollTop=0;$("#avisoOk").onclick=function(){$("#aviso").hidden=true}}
+  $("#fChips").insertAdjacentHTML("afterbegin",chipAbierto(l)+(esDeHoy(l)?chipTipo(l):""));
+  if(/⚠️/.test(l["Próxima acción"]||"")){var nf=notasDe(l);$("#avisoTit").textContent="Vuelve a llamar a "+l.Negocio;$("#avisoTxt").innerHTML=md("**"+String(l["Próxima acción"]).replace(/^\s*\[[^\]]*\]\s*/,"").replace(/⚠️\s*/,"")+"**"+(nf.length?"\n\nÚltima nota: «"+nf[nf.length-1].slice(0,160)+"»":""));$("#aviso").hidden=false;$("#aviso .caja").scrollTop=0;$("#avisoOk").onclick=function(){$("#aviso").hidden=true}}
   var t=telD(l["Teléfono"]),web=String(l["Web actual"]||""),dom=(web.match(/([a-z0-9-]+\.)+[a-z]{2,}/i)||[""])[0],q=encodeURIComponent(l.Negocio+" "+(l.Zona||""));
   $("#fAcc").innerHTML=(t?'<a class="btn g" href="tel:+34'+t+'">'+ico("tel")+'Llamar · '+esc(tel(t))+'</a><a class="btn" target="_blank" rel="noopener" href="https://wa.me/34'+t+'?text='+encodeURIComponent("Hola, soy Pau, de PmotionIA 👋 ")+'">'+ico("wa")+'WhatsApp</a>':"")
     +'<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/'+q+'">'+ico("map")+'Maps</a>'
