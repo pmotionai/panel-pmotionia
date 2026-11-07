@@ -588,6 +588,10 @@ function sector(l){var t=(l.Tipo||"")+" "+l.Negocio;
     preg:["«¿Cómo os organizáis ahora para pedir la documentación a los clientes?»","«Y las consultas que llegan por WhatsApp o teléfono, ¿quién las atiende?»"],
     cons:[["Avisos automáticos","cada cliente recibe qué tiene que mandar y cuándo. **Dejáis de perder tiempo persiguiendo papeles.**"],["Asistente de WhatsApp","responde las preguntas de siempre al momento. **Horas libres cada semana para el equipo.**"],["CRM con avisos","cada cliente y cada trámite con su fecha. **Sin tiempo perdido repasando vencimientos.**"]],
     hora:"Mejor hora: 8:00–9:30. Evita del 10 al 20 de enero, abril, julio y octubre."};
+  // Talleres mecánicos (07/11/2026): guion propio de Pau, solo él los llama (viernes 16:00)
+  if(/taller|mec[aá]nic/i.test(l.Tipo||""))return{k:"taller",nom:"taller mecánico",plural:"talleres",gente:"clientes",coste:"",numeros:"",promesa:"",resultado:"",preg:[],cons:[],
+    rescate:"¿cuántas veces al día te llaman para preguntar si el coche ya está?",
+    hora:"Mejor hora: viernes 16:00–17:30 (o 9:30–10:30 entre semana). Nunca de 8 a 9 (entran coches) ni de 13 a 15 (cerrado)."};
   if(/fisio|osteo|cl[ií]nica|dent|psic|podo|nutri/i.test(t))return{k:"salud",coste:"«Más o menos, ¿cuántos pacientes al mes no vienen sin avisar?» y «¿Cuánto vale una sesión, de media?»",numeros:"«A ver si lo he entendido: se os pierden unas **[X] citas al mes**, y cada sesión son unos **[Y] €**. Son **[X × Y] € al mes** que no entran, **[× 12] € al año**, además del hueco que se queda vacío. ¿Lo ves así?» *(Usa SUS números; si no sabe cuántas son: «¿una a la semana? ¿dos?».)*",nom:/fisio/i.test(t)?"centro de fisioterapia":"clínica",plural:"clínicas de fisioterapia y salud",gente:"pacientes",
     promesa:"que vuestros pacientes no falten a la cita, con recordatorios por WhatsApp",
     rescate:"¿cuántos pacientes al mes no vienen sin avisar?",
@@ -617,6 +621,7 @@ function generarGuion(l){
   if(nt.length)antes.push("Última nota: «"+nt[nt.length-1].slice(0,140)+"»");
   antes.unshift("No te rechazan a ti: rechazan una oferta que les acabas de contar en 10 segundos. Un «no» no es un fracaso, es un paso más cerca del «sí» siguiente. Si cuelgan, pasas a la siguiente ficha sin darle vueltas.");
   antes.forEach(function(x){out.push("- "+x)});
+  if(S.k=="taller")return out.concat(guionTaller(l,dias)).join("\n");
   out.push("## Apertura");
   out.push("**Nunca digas «especialista en automatizaciones», «inteligencia artificial» ni nada parecido al presentarte: es lo que hace que cuelguen antes de escuchar. Di siempre esta, tal cual:**");
   if(tipoLlamada(l)=="seg"){
@@ -679,6 +684,39 @@ function generarGuion(l){
   obj.forEach(function(o){out.push("- **"+o[0]+"** → "+o[1])});
   return out.join("\n");
 }
+/* Guion de talleres (aprobado por Pau el 07/11/2026): sin decir la empresa en la apertura y con preguntas de validación */
+function guionTaller(l,dias){return[
+  "## 1 · Quién coge",
+  "En un taller pequeño suele coger el dueño. Si coge otro mecánico:",
+  "> «Hola, buenas tardes. ¿Me pasas con el encargado, por favor? Dile que es **"+YO+"**.»",
+  "Si preguntan **«¿De qué se trata?»** → «Es por un tema de las llamadas de los clientes que preguntan por su coche. Un minuto.»",
+  "## 2 · Apertura con el dueño (con energía)",
+  "> «¿Qué tal? Soy **"+YO+"**. Sé que estás trabajando y no nos conocemos de nada, así que voy rápido. Te soy sincero: te llamo para proponerte una cosa, y si no te encaja me cuelgas y no pasa nada, ¿vale?»",
+  "## 3 · Pitch + pregunta",
+  "> «Ayudo a talleres de aquí del Maresme con una cosa muy concreta: que los clientes **dejen de llamarte para preguntar cómo va su coche**. Cuando el coche pasa a reparación o está listo, le llega un WhatsApp solo, sin que tú sueltes la llave.»",
+  "> «Una pregunta: **¿cuántas veces al día te llaman para preguntar si el coche ya está?**»",
+  "## 4 · Según lo que conteste (apunta sus palabras exactas)",
+  "- **«Uf, muchas» / «todo el día»** → «¿Y quién lo coge cuando estás debajo de un coche?» → cierre.",
+  "- **«Pocas, ya les aviso yo»** → «¿Y cómo lo haces, les llamas tú uno a uno?» Si sí → «Eso es justo lo que te quitamos.» → cierre.",
+  "- **«Ya tengo un programa»** → «Perfecto, ¿cuál? ¿Y avisa solo al cliente cuando está listo?» Si no → «Esto va encima, sin cambiarlo.» → cierre.",
+  "- **«Mis clientes son mayores, llaman»** → «Pueden seguir llamando; los que usan WhatsApp dejan de hacerlo, y eso ya son muchas llamadas menos.» → cierre.",
+  "## 5 · Cierre",
+  "> «Lo mejor es que lo veas con tu caso: 15 minutos y te enseño cómo quedaría en **"+l.Negocio+"**. ¿Te va mejor el **"+dias[0]+"** o el **"+dias[1]+"**? Si quieres, me paso yo por el taller.»",
+  "Si acepta: «Por favor, sé puntual y no lo canceles a última hora; si no puedes, avísame con tiempo.» Pide **nombre, WhatsApp y correo**. Pregunta también **cuántos sois en el taller**.",
+  "## 6 · Preguntas para validar (apúntalas aunque diga que no)",
+  "- ¿Cuántas veces al día te llaman para preguntar si el coche está listo?",
+  "- ¿Quién coge el teléfono cuando estás debajo de un coche?",
+  "- ¿Cómo mandas los presupuestos y cuánto tardan en contestarte?",
+  "- ¿Avisas a tus clientes de la ITV o la revisión?",
+  "## Si te dice…",
+  "- **«¿Cuánto cuesta?»** → «Depende de lo que montemos; por eso prefiero enseñártelo en 15 minutos con tu caso.» *(Nunca precio por teléfono.)*",
+  "- **«Mándame info»** → «Claro, ¿a qué WhatsApp? Pero en 15 minutos lo ves con tu taller. ¿"+dias[0]+" o "+dias[1]+"?»",
+  "- **«No tengo tiempo»** → «Por eso: lo montamos nosotros, a ti te pido 30 minutos.»",
+  "- **«No me interesa»** → «Sin problema, gracias por el rato.» Apúntalo con su motivo.",
+  "## Reglas",
+  "- No digas «PmotionIA» al empezar (solo si te preguntan o en la reunión).",
+  "- Nada de «IA», «agente», «automatización» ni «software»: di «avisos por WhatsApp».",
+  "- Nunca mientas (ni «soy cliente» ni «me conoce»)."]}
 function guionOficial(){return GUION_BASE.split("## Anexo")[0].split(/\r?\n/).filter(function(r){return!/^>\s*(Versión|El guion antiguo)/.test(r)&&!/^# /.test(r)}).join("\n")}
 function md(t){var out=[],lista=false,tabla=false;
   t.split(/\r?\n/).forEach(function(r){var s=esc(r).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<i>$1</i>").replace(/`(.+?)`/g,"$1");
