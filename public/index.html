@@ -351,6 +351,7 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
     <section class="v" id="v-clientes">
       <div class="cab"><div><p class="kick" id="cliSub"></p><h1>Clientes potenciales</h1></div>
         <div class="seg"><button data-vista="tablero" class="on"><svg class="i"><use href="#i-tab"/></svg>Tablero</button><button data-vista="tarjetas"><svg class="i"><use href="#i-grid"/></svg>Tarjetas</button></div></div>
+      <div class="filtros nichos" id="nichos" style="margin-bottom:12px"></div>
       <div class="barra"><input class="in" id="busca" type="search" placeholder="Buscar negocio, zona o teléfono"><div class="filtros" id="filtros" hidden></div></div>
       <div id="tablero" class="kanban"></div>
       <div id="tarjetas" class="rejilla" hidden></div>
@@ -436,7 +437,7 @@ var PIN="",LEADS=[],HOY="",SEL=null,CONEX={},FEED={act:[],ord:[],tar:[]},AGENDA=
 /* /raffi y /rayan mandan sobre lo guardado: si en este navegador había entrado otra persona, se le vuelve a pedir el PIN */
 var YO_RUTA=location.pathname=="/raffi"?"Raffi":location.pathname=="/rayan"?"Rayan":"";
 var YO=(function(){try{var g=localStorage.getItem("pm_yo");if(YO_RUTA&&g!=YO_RUTA){localStorage.removeItem("pm_pin");localStorage.setItem("pm_yo",YO_RUTA)}return YO_RUTA||g||"Pau"}catch(e){return YO_RUTA||"Pau"}})();
-var ORDEN_HOY=[],ORDEN_LISTA=[],ORDEN_FICHA=[],VISTA="tablero",FILTRO="hoy",GTAB="hecho";
+var ORDEN_HOY=[],ORDEN_LISTA=[],ORDEN_FICHA=[],VISTA="tablero",NICHO="todos",FILTRO="hoy",GTAB="hecho";
 try{PIN=localStorage.getItem("pm_pin")||""}catch(e){}
 var $=function(s){return document.querySelector(s)};
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML}
@@ -457,6 +458,10 @@ function iniciales(n){var GEN=/^(inmobiliaria|immobili[aà]ria|gestor[ií]a|ases
 function estadoTxt(e){return({"CON FECHA":"Con fecha","VOLVER A LLAMAR":"Volver a llamar","POR LLAMAR":"Por llamar","REUNIÓN":"Demo","SEGUIMIENTO":"Seguimiento","INTERESADO":"Interesado","NO INTERESADO":"No interesa","DESCARTADO":"Descartado","APARCADO":"Aparcado","NUEVO":"Nuevo","VISITAR":"Visitar","CLIENTE":"Cliente"})[e]||String(e||"")}
 function caliente(l){return l.Estado=="INTERESADO"||l.Estado=="REUNIÓN"||l.Estado=="CLIENTE"}
 function esInmo(l){return/inmobil|finques|fincas|real estate|immobil|habitat|llar|home/i.test((l.Tipo||"")+" "+l.Negocio)}
+function esFisio(l){return/fisio|osteo|podo|cl[ií]nica|quiropr/i.test((l.Tipo||"")+" "+l.Negocio)}
+function esTaller(l){return/taller|mec[aà]nic|automoci|motor|auto|neum[aà]tic|carrocer|chapa|pintura/i.test((l.Tipo||"")+" "+l.Negocio)}
+var NICHOS=[["todos","Todos",function(){return true}],["inmo","Inmobiliarias",esInmo],["fisio","Fisios",esFisio],["taller","Talleres",esTaller]];
+function delNicho(l){if(NICHO=="todos")return true;for(var i=0;i<NICHOS.length;i++)if(NICHOS[i][0]==NICHO)return NICHOS[i][2](l);return true}
 function esGest(l){return/gestor|asesor|assessor|tr[aà]mit|consult/i.test((l.Tipo||"")+" "+l.Negocio)}
 
 /* ---------- datos ---------- */
@@ -521,18 +526,20 @@ function filtra(l){var e=l.Estado;switch(FILTRO){case"hoy":return llamadasHoy().
 function orden(a,b){var fa=fechaDe(a)||"9",fb=fechaDe(b)||"9";if(fa!=fb)return fa<fb?-1:1;var ha=horaDe(a)||"99",hb=horaDe(b)||"99";return ha==hb?String(a.Negocio).localeCompare(String(b.Negocio)):ha<hb?-1:1}
 function busca(l){var q=$("#busca").value.toLowerCase().trim();return!q||[l.Negocio,l.Zona,l.Tipo,l["Teléfono"],l.Notas].join(" ").toLowerCase().indexOf(q)>=0}
 function pintarClientes(){
+  var BASE=LEADS.filter(delNicho);
+  $("#nichos").innerHTML=NICHOS.map(function(n){return'<button data-n="'+n[0]+'" class="'+(NICHO==n[0]?"on":"")+'">'+n[1]+' <span style="opacity:.6">'+LEADS.filter(n[2]).filter(function(l){return EN_COLA.indexOf(l.Estado)>=0||l.Estado=="SEGUIMIENTO"}).length+'</span></button>'}).join("");
   $("#tablero").hidden=VISTA!="tablero";$("#tarjetas").hidden=VISTA!="tarjetas";$("#filtros").hidden=VISTA!="tarjetas";
   document.querySelectorAll("[data-vista]").forEach(function(b){b.classList.toggle("on",b.dataset.vista==VISTA)});
   if(VISTA=="tablero"){
     ORDEN_LISTA=[];
-    $("#tablero").innerHTML=COLS.map(function(c,i){var L=LEADS.filter(c[1]).filter(busca).sort(orden);ORDEN_LISTA=ORDEN_LISTA.concat(L.map(function(l){return l.ID}));
+    $("#tablero").innerHTML=COLS.map(function(c,i){var L=BASE.filter(c[1]).filter(busca).sort(orden);ORDEN_LISTA=ORDEN_LISTA.concat(L.map(function(l){return l.ID}));
       return'<div class="col"><div class="ch"><span class="dot'+(i>=2?" v":"")+'"></span>'+c[0]+'<span class="num">'+L.length+'</span></div><div class="lista">'+(L.slice(0,120).map(function(l){return tarjeta(l,"cli")}).join("")||'<div class="vacio" style="padding:8px 4px">Vacío</div>')+'</div></div>'}).join("");
-    $("#cliSub").textContent=LEADS.length+" negocios en el CRM";
+    $("#cliSub").textContent=BASE.length+" negocios"+(NICHO=="todos"?" en el CRM":"");
   }else{
     $("#filtros").innerHTML=FILTROS.map(function(f){return'<button data-f="'+f[0]+'" class="'+(FILTRO==f[0]?"on":"")+'">'+f[1]+'</button>'}).join("");
-    var L=LEADS.filter(filtra).filter(busca).sort(orden);ORDEN_LISTA=L.map(function(l){return l.ID});
+    var L=BASE.filter(filtra).filter(busca).sort(orden);ORDEN_LISTA=L.map(function(l){return l.ID});
     $("#tarjetas").innerHTML=L.slice(0,240).map(function(l){return tarjeta(l,"cli")}).join("")||'<div class="vacio">No hay negocios con este filtro.</div>';
-    $("#cliSub").textContent=L.length+" de "+LEADS.length;
+    $("#cliSub").textContent=L.length+" de "+BASE.length;
   }
 }
 
@@ -804,6 +811,7 @@ document.addEventListener("click",function(e){
   var a=e.target.closest("[data-abrir]");if(a)return abrir(a.dataset.abrir,ORDEN_HOY);
   var t=e.target.closest("[data-ir]");if(t){ir("clientes");VISTA="tarjetas";FILTRO=t.dataset.ir;pintarClientes()}});
 document.querySelectorAll("[data-vista]").forEach(function(b){b.onclick=function(){VISTA=b.dataset.vista;pintarClientes()}});
+$("#nichos").onclick=function(e){var b=e.target.closest("[data-n]");if(b){NICHO=b.dataset.n;pintarClientes()}};
 $("#filtros").onclick=function(e){var b=e.target.closest("[data-f]");if(b){FILTRO=b.dataset.f;pintarClientes()}};
 $("#busca").oninput=pintarClientes;
 
