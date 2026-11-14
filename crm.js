@@ -176,7 +176,7 @@ async function redactar(b){
     try {
       const A = require("@anthropic-ai/sdk"), c = new (A.default || A)();
       const r = await c.messages.create({ model:E.CEREBRO_MODELO_EQUIPO || "claude-haiku-5-5", max_tokens:700,
-        system:`Redactas mensajes de seguimiento de PmotionIA justo después de una llamada a un negocio. Español de España, cercano y profesional, de tú si es WhatsApp y de usted solo si el tema lo pide. Corto: WhatsApp 2-4 frases; email 4-8 frases. Habla de lo que gana el negocio (tiempo, clientes, citas), nunca de «agentes» ni jerga de IA. No des precios salvo que el tema los traiga escritos. No inventes datos. No pongas firma (se añade sola). Nunca escribas «soy X de PmotionIA» ni «de PmotionIA» al presentarte: preséntate solo con el nombre. ${canal === "email" ? 'Devuelve JSON: {"asunto":"...","texto":"..."}' : 'Devuelve JSON: {"texto":"..."}'} y nada más.`,
+        system:`Redactas mensajes de seguimiento de PmotionIA justo después de una llamada a un negocio. Español de España, cercano y profesional, de tú si es WhatsApp y de usted solo si el tema lo pide. Corto: WhatsApp 2-4 frases; email 4-8 frases. Habla de lo que gana el negocio (tiempo, clientes, citas), nunca de «agentes» ni jerga de IA. No des precios salvo que el tema los traiga escritos. No inventes datos. No pongas firma (se añade sola). Nunca escribas «soy X de PmotionIA» ni «de PmotionIA» al presentarte: preséntate solo con el nombre. El asunto del email no lleva la marca PmotionIA. ${canal === "email" ? 'Devuelve JSON: {"asunto":"...","texto":"..."}' : 'Devuelve JSON: {"texto":"..."}'} y nada más.`,
         messages:[{ role:"user", content:`Negocio: ${negocio || "(sin ficha)"}${l && l.Tipo ? " (" + l.Tipo + ", " + (l.Zona || "") + ")" : ""}\nLlamó: ${quien} de PmotionIA\nQué hay que enviar: ${tema}` }] });
       const j = JSON.parse((r.content.find(x => x.type === "text") || {}).text.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
       asunto = j.asunto || ""; texto = j.texto || "";
@@ -186,9 +186,9 @@ async function redactar(b){
     texto = canal === "email"
       ? `Hola${negocio ? ", equipo de " + negocio : ""}:\n\nGracias por atenderme por teléfono hace un momento. Como te comenté, te envío lo que me pediste: ${tema}.\n\nSi te va bien, lo vemos en 15 minutos cuando te encaje.\n\nUn saludo,`
       : `Hola${negocio ? ", " + negocio : ""} 👋 Soy ${quien}. Gracias por atenderme. Te paso lo que hablamos: ${tema}.`;
-    asunto = `PmotionIA · ${tema.charAt(0).toUpperCase() + tema.slice(1, 70)}`;
+    asunto = tema.charAt(0).toUpperCase() + tema.slice(1, 70);
   }
-  if (canal === "email"){ texto = texto.replace(/\s+$/, "") + "\n\n" + FIRMA(quien); return { asunto:asunto || "PmotionIA · lo que hablamos", texto, ia:!!E.ANTHROPIC_API_KEY }; }
+  if (canal === "email"){ texto = texto.replace(/\s+$/, "") + "\n\n" + FIRMA(quien); return { asunto:String(asunto || "Lo que hablamos").replace(/^\s*PmotionIA\s*[·:|-]\s*/i, ""), texto, ia:!!E.ANTHROPIC_API_KEY }; }
   return { texto, ia:!!E.ANTHROPIC_API_KEY };
 }
 async function email(b){
