@@ -413,6 +413,7 @@ dl.datos dt{color:var(--mute);font-size:13px}dl.datos dd{margin:0;overflow-wrap:
   </div></div>
   <div class="f-head"><div class="av l" id="fAv"></div><div style="min-width:0;flex:1"><h1 id="fNombre"></h1><div class="chips" id="fChips"></div></div></div>
   <div class="f-acc" id="fAcc"></div>
+  <div id="fMsg" class="card" hidden style="margin-top:12px"></div>
   <div class="f-body">
     <div class="izq">
       <div class="siguiente" id="fSig"></div>
@@ -767,7 +768,7 @@ function abrir(id,orden){
   $("#fChips").insertAdjacentHTML("afterbegin",chipAbierto(l)+(esDeHoy(l)?chipTipo(l):""));
   if(/⚠️/.test(l["Próxima acción"]||"")){var nf=notasDe(l);$("#avisoTit").textContent="Vuelve a llamar a "+l.Negocio;$("#avisoTxt").innerHTML=md("**"+String(l["Próxima acción"]).replace(/^\s*\[[^\]]*\]\s*/,"").replace(/⚠️\s*/,"")+"**"+(nf.length?"\n\nÚltima nota: «"+nf[nf.length-1].slice(0,160)+"»":""));$("#aviso").hidden=false;$("#aviso .caja").scrollTop=0;$("#avisoOk").onclick=function(){$("#aviso").hidden=true}}
   var t=telD(l["Teléfono"]),web=String(l["Web actual"]||""),dom=(web.match(/([a-z0-9-]+\.)+[a-z]{2,}/i)||[""])[0],q=encodeURIComponent(l.Negocio+" "+(l.Zona||""));
-  $("#fAcc").innerHTML=(t?'<a class="btn g" href="tel:+34'+t+'">'+ico("tel")+'Llamar · '+esc(tel(t))+'</a><a class="btn" target="_blank" rel="noopener" href="https://wa.me/34'+t+'?text='+encodeURIComponent("Hola, soy Pau, de PmotionIA 👋 ")+'">'+ico("wa")+'WhatsApp</a>':"")
+  $("#fAcc").innerHTML=(t?'<a class="btn g" href="tel:+34'+t+'">'+ico("tel")+'Llamar · '+esc(tel(t))+'</a><button class="btn" id="fWa">'+ico("wa")+'Enviar WhatsApp</button>':"")+'<button class="btn" id="fMail">✉️ Enviar email</button>'
     +'<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/'+q+'">'+ico("map")+'Maps</a>'
     +'<a class="btn" target="_blank" rel="noopener" href="'+(dom?"https://"+esc(dom):"https://www.google.com/search?q="+q)+'">'+ico("web")+(dom?"Web":"Buscar web")+'</a>'
     +'<a class="btn" target="_blank" rel="noopener" href="https://www.instagram.com/explore/search/keyword/?q='+encodeURIComponent(l.Negocio)+'">'+ico("ig")+'Instagram</a>'
@@ -781,7 +782,34 @@ function abrir(id,orden){
   $("#fNota").value="";GTAB="hecho";pintarGuion();pintarRes();
   var i=ORDEN_FICHA.indexOf(id);$("#fPrev").disabled=i<=0;$("#fNext").disabled=i<0||i>=ORDEN_FICHA.length-1;$("#fPos").textContent=i>=0?(i+1)+" de "+ORDEN_FICHA.length:"";
   var fi=$("#ficha");if(!fi.classList.contains("on")){fi.classList.add("on");document.body.style.overflow="hidden"}fi.scrollTop=0;
+  $("#fMsg").hidden=true;$("#fMsg").innerHTML="";if($("#fWa"))$("#fWa").onclick=function(){msgForm(l,"whatsapp")};$("#fMail").onclick=function(){msgForm(l,"email")};
   $("#fTodo").onclick=function(){var b=this;b.disabled=true;api("/api/crm/todoist",{content:"Llamar a "+l.Negocio+" ("+tel(l["Teléfono"])+")",due:f&&f>=HOY?f+(h?" "+h:""):"hoy"}).then(function(){toast("Tarea creada en Todoist");cargarTareas()}).catch(function(e){toast(e.message)}).then(function(){b.disabled=false})};
+}
+/* Enviar WhatsApp / email tras la llamada: Pau escribe qué piden, el agente redacta, Pau revisa y envía */
+function msgForm(l,canal){var M=$("#fMsg"),wa=canal=="whatsapp";M.hidden=false;
+  M.innerHTML='<p class="titulo">'+(wa?"Enviar WhatsApp":"Enviar email")+' · '+esc(l.Negocio)+'</p>'
+    +(wa?'':'<input class="in" id="mTo" type="email" placeholder="Correo al que enviarlo (obligatorio)" style="margin-top:8px">')
+    +'<textarea class="in" id="mTema" rows="2" placeholder="'+(wa?"Tema del mensaje: qué le envío":"Qué piden en el correo")+'" style="margin-top:8px"></textarea>'
+    +(wa?'<input class="in" id="mNum" inputmode="tel" placeholder="Otro número (opcional; si no, al '+esc(tel(l["Teléfono"]))+')" style="margin-top:8px">':'')
+    +'<div class="mini"><button class="btn g sm" id="mRed">Redactar</button><button class="btn sm" id="mX">Cancelar</button></div><div id="mBorr"></div>';
+  M.scrollIntoView({block:"nearest",behavior:"smooth"});(wa?$("#mTema"):$("#mTo")).focus();
+  $("#mX").onclick=function(){M.hidden=true;M.innerHTML=""};
+  $("#mRed").onclick=function(){var tema=$("#mTema").value.trim(),to=wa?"":$("#mTo").value.trim();
+    if(!wa&&!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(to)){toast("Pon un correo válido");return $("#mTo").focus()}
+    if(!tema){toast(wa?"Escribe el tema del mensaje":"Escribe qué piden");return $("#mTema").focus()}
+    var num=wa?String($("#mNum").value).replace(/\D/g,"").replace(/^(0034|34)(?=\d{9}$)/,""):"";
+    if(wa&&num&&num.length<9){toast("El otro número no es válido");return $("#mNum").focus()}
+    var b=this;b.disabled=true;b.textContent="Redactando…";
+    api("/api/crm/redactar",{id:l.ID,canal:canal,tema:tema}).then(function(r){
+      $("#mBorr").innerHTML=(wa?'':'<input class="in" id="mAs" style="margin-top:12px">')+'<textarea class="in" id="mTxt" rows="'+(wa?5:11)+'" style="margin-top:8px"></textarea>'
+        +'<div class="mini"><button class="btn g" id="mEnv">'+(wa?"Abrir WhatsApp y enviar":"Enviar email")+'</button><span class="sm mute">'+(wa?"A "+esc(tel(num||telD(l["Teléfono"]))):"A "+esc(to))+' · revísalo antes</span></div>';
+      if(!wa)$("#mAs").value=r.asunto;$("#mTxt").value=r.texto;$("#mTxt").focus();
+      $("#mEnv").onclick=function(){var e=this,txt=$("#mTxt").value.trim();if(!txt)return toast("El mensaje está vacío");
+        if(wa){var n=num||telD(l["Teléfono"]);window.open("https://wa.me/"+(n.length==9?"34":"")+n+"?text="+encodeURIComponent(txt),"_blank","noopener");
+          api("/api/crm/nota",{id:l.ID,texto:"WhatsApp enviado"+(num?" al "+tel(num):"")+": "+tema.slice(0,120)}).catch(function(){});toast("WhatsApp abierto · apuntado en la ficha");M.hidden=true;M.innerHTML="";return}
+        e.disabled=true;e.textContent="Enviando…";
+        api("/api/crm/email",{id:l.ID,to:to,asunto:$("#mAs").value.trim(),texto:txt}).then(function(){toast("Email enviado a "+to);M.hidden=true;M.innerHTML=""}).catch(function(x){toast(x.message);e.disabled=false;e.textContent="Enviar email"})};
+    }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false;b.textContent="Redactar de nuevo"})};
 }
 function cerrarFicha(){$("#ficha").classList.remove("on");document.body.style.overflow="";SEL=null}
 $("#fCerrar").onclick=cerrarFicha;

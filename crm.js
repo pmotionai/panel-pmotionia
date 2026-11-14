@@ -162,6 +162,44 @@ async function metricool(){
   return { conectado:true, posts };
 }
 
+/* ---------- Mensajes tras la llamada: WhatsApp y email ---------- */
+// El agente redacta con lo que Pau escribe («qué piden»); Pau lo revisa y lo envía. Con ANTHROPIC_API_KEY redacta Claude; sin ella, una plantilla.
+const FIRMA = "Pau · PmotionIA\nWhatsApp Business: 684 48 35 49\npmotionia.com";
+async function redactar(b){
+  const canal = b.canal === "email" ? "email" : "whatsapp", tema = String(b.tema || "").trim().slice(0, 600);
+  if (!tema) throw new Error("Escribe qué hay que enviar");
+  const l = /^L-\d+$/.test(String(b.id || "")) ? (await leads()).find(x => x.ID === b.id) : null;
+  if (l) await suyo(l.ID, b.quien);
+  const negocio = l ? l.Negocio : "", quien = b.quien && b.quien !== "Pau" ? b.quien : "Pau";
+  let asunto = "", texto = "";
+  if (E.ANTHROPIC_API_KEY){
+    try {
+      const A = require("@anthropic-ai/sdk"), c = new (A.default || A)();
+      const r = await c.messages.create({ model:E.CEREBRO_MODELO_EQUIPO || "claude-haiku-5-5", max_tokens:700,
+        system:`Redactas mensajes de seguimiento de PmotionIA justo después de una llamada a un negocio. Español de España, cercano y profesional, de tú si es WhatsApp y de usted solo si el tema lo pide. Corto: WhatsApp 2-4 frases; email 4-8 frases. Habla de lo que gana el negocio (tiempo, clientes, citas), nunca de «agentes» ni jerga de IA. No des precios salvo que el tema los traiga escritos. No inventes datos. No pongas firma (se añade sola). ${canal === "email" ? 'Devuelve JSON: {"asunto":"...","texto":"..."}' : 'Devuelve JSON: {"texto":"..."}'} y nada más.`,
+        messages:[{ role:"user", content:`Negocio: ${negocio || "(sin ficha)"}${l && l.Tipo ? " (" + l.Tipo + ", " + (l.Zona || "") + ")" : ""}\nLlamó: ${quien} de PmotionIA\nQué hay que enviar: ${tema}` }] });
+      const j = JSON.parse((r.content.find(x => x.type === "text") || {}).text.replace(/^[^{]*/, "").replace(/[^}]*$/, ""));
+      asunto = j.asunto || ""; texto = j.texto || "";
+    } catch (e) { texto = ""; }
+  }
+  if (!texto){
+    texto = canal === "email"
+      ? `Hola${negocio ? ", equipo de " + negocio : ""}:\n\nGracias por atenderme por teléfono hace un momento. Como te comenté, te envío lo que me pediste: ${tema}.\n\nSi te va bien, lo vemos en 15 minutos cuando te encaje.\n\nUn saludo,`
+      : `Hola${negocio ? ", " + negocio : ""} 👋 Soy ${quien}, de PmotionIA. Gracias por atenderme. Te paso lo que hablamos: ${tema}.`;
+    asunto = `PmotionIA · ${tema.charAt(0).toUpperCase() + tema.slice(1, 70)}`;
+  }
+  if (canal === "email"){ texto = texto.replace(/\s+$/, "") + "\n\n" + FIRMA; return { asunto:asunto || "PmotionIA · lo que hablamos", texto, ia:!!E.ANTHROPIC_API_KEY }; }
+  return { texto, ia:!!E.ANTHROPIC_API_KEY };
+}
+async function email(b){
+  const to = String(b.to || "").trim();
+  if (!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(to)) throw new Error("El correo no es válido");
+  if (b.id) await suyo(String(b.id), b.quien);
+  await hoja({ action:"email", to, asunto:String(b.asunto || "").slice(0, 200), texto:String(b.texto || "").slice(0, 8000) });
+  if (/^L-\d+$/.test(String(b.id || ""))) await nota({ id:b.id, quien:b.quien, texto:`email enviado a ${to}: ${String(b.asunto || "").slice(0, 120)}` });
+  return { ok:true };
+}
+
 const conexiones = () => ({ hoja:!!(E.CRM_URL && E.CRM_TOKEN), calendar:!!E.ICS_URL || !!resCache.d, correo:!!resCache.d, todoist:!!E.TODOIST_TOKEN, metricool:!!(E.METRICOOL_TOKEN && E.METRICOOL_USER && E.METRICOOL_BLOG), guion:!!leeGuion() });
 
 /* ---------- rutas ---------- */
@@ -184,6 +222,8 @@ async function handle(req, res, P, send, readBody){
     if (b) b.quien = req.quien;
     if (P === "/api/crm/resultado") return ok(resultado(b));
     if (P === "/api/crm/nota") return ok(nota(b));
+    if (P === "/api/crm/redactar") return ok(redactar(b));
+    if (P === "/api/crm/email") return ok(email(b));
     if (P === "/api/crm/todoist") return ok(todoist(b));
     if (P === "/api/crm/todoist-cerrar") return ok(cerrarTodoist(b));
     send(res, 404, { error:"no" });
