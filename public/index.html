@@ -809,7 +809,7 @@ function msgForm(l,canal){var M=$("#fMsg"),wa=canal=="whatsapp";M.hidden=false;
         if(wa){var n=num||telD(l["Teléfono"]);window.open("https://wa.me/"+(n.length==9?"34":"")+n+"?text="+encodeURIComponent(txt),"_blank","noopener");
           api("/api/crm/nota",{id:l.ID,texto:"WhatsApp enviado"+(num?" al "+tel(num):"")+": "+tema.slice(0,120)}).catch(function(){});toast("WhatsApp abierto · apuntado en la ficha");M.hidden=true;M.innerHTML="";return}
         e.disabled=true;e.textContent="Enviando…";
-        api("/api/crm/email",{id:l.ID,to:to,asunto:$("#mAs").value.trim(),texto:txt}).then(function(){toast("Email enviado a "+to);M.hidden=true;M.innerHTML=""}).catch(function(x){toast(x.message);e.disabled=false;e.textContent="Enviar email"})};
+        api("/api/crm/email",{id:l.ID,firma:QUIEN,to:to,asunto:$("#mAs").value.trim(),texto:txt}).then(function(){toast("Email enviado a "+to);M.hidden=true;M.innerHTML=""}).catch(function(x){toast(x.message);e.disabled=false;e.textContent="Enviar email"})};
     }).catch(function(e){toast(e.message)}).then(function(){b.disabled=false;b.textContent="Redactar de nuevo"})};
 }
 function cerrarFicha(){$("#ficha").classList.remove("on");document.body.style.overflow="";SEL=null}

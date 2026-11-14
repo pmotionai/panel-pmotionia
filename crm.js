@@ -195,7 +195,7 @@ async function email(b){
   const to = String(b.to || "").trim();
   if (!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(to)) throw new Error("El correo no es válido");
   if (b.id) await suyo(String(b.id), b.quien);
-  await hoja({ action:"email", to, asunto:String(b.asunto || "").slice(0, 200), texto:String(b.texto || "").slice(0, 8000) });
+  await hoja({ action:"email", to, nombre:["Pau", "Rayan", "Raffi"].includes(b.firma) ? b.firma : (b.quien || "Pau"), asunto:String(b.asunto || "").slice(0, 200), texto:String(b.texto || "").slice(0, 8000) });
   if (/^L-\d+$/.test(String(b.id || ""))) await nota({ id:b.id, quien:b.quien, texto:`email enviado a ${to}: ${String(b.asunto || "").slice(0, 120)}` });
   return { ok:true };
 }
