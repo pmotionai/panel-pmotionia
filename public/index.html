@@ -791,16 +791,17 @@ function msgForm(l,canal){var M=$("#fMsg"),wa=canal=="whatsapp";M.hidden=false;
     +(wa?'':'<input class="in" id="mTo" type="email" placeholder="Correo al que enviarlo (obligatorio)" style="margin-top:8px">')
     +'<textarea class="in" id="mTema" rows="2" placeholder="'+(wa?"Tema del mensaje: qué le envío":"Qué piden en el correo")+'" style="margin-top:8px"></textarea>'
     +(wa?'<input class="in" id="mNum" inputmode="tel" placeholder="Otro número (opcional; si no, al '+esc(tel(l["Teléfono"]))+')" style="margin-top:8px">':'')
-    +'<div class="mini"><button class="btn g sm" id="mRed">Redactar</button><button class="btn sm" id="mX">Cancelar</button></div><div id="mBorr"></div>';
+    +'<div class="mini" id="mQuien"><span class="sm mute">¿Quién envía?</span>'+["Pau","Rayan","Raffi"].map(function(n){return'<button class="btn sm" data-q="'+n+'">'+n+'</button>'}).join("")+'</div>'+'<div class="mini"><button class="btn g sm" id="mRed">Redactar</button><button class="btn sm" id="mX">Cancelar</button></div><div id="mBorr"></div>';
   M.scrollIntoView({block:"nearest",behavior:"smooth"});(wa?$("#mTema"):$("#mTo")).focus();
   $("#mX").onclick=function(){M.hidden=true;M.innerHTML=""};
+  var QUIEN="";$("#mQuien").onclick=function(e){var x=e.target.closest("[data-q]");if(!x)return;QUIEN=x.dataset.q;[].forEach.call(this.querySelectorAll("[data-q]"),function(y){y.classList.toggle("g",y==x)})};
   $("#mRed").onclick=function(){var tema=$("#mTema").value.trim(),to=wa?"":$("#mTo").value.trim();
     if(!wa&&!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(to)){toast("Pon un correo válido");return $("#mTo").focus()}
-    if(!tema){toast(wa?"Escribe el tema del mensaje":"Escribe qué piden");return $("#mTema").focus()}
+    if(!tema){toast(wa?"Escribe el tema del mensaje":"Escribe qué piden");return $("#mTema").focus()}if(!QUIEN)return toast("Elige quién envía: Pau, Rayan o Raffi");
     var num=wa?String($("#mNum").value).replace(/\D/g,"").replace(/^(0034|34)(?=\d{9}$)/,""):"";
     if(wa&&num&&num.length<9){toast("El otro número no es válido");return $("#mNum").focus()}
     var b=this;b.disabled=true;b.textContent="Redactando…";
-    api("/api/crm/redactar",{id:l.ID,canal:canal,tema:tema}).then(function(r){
+    api("/api/crm/redactar",{id:l.ID,canal:canal,tema:tema,firma:QUIEN}).then(function(r){
       $("#mBorr").innerHTML=(wa?'':'<input class="in" id="mAs" style="margin-top:12px">')+'<textarea class="in" id="mTxt" rows="'+(wa?5:11)+'" style="margin-top:8px"></textarea>'
         +'<div class="mini"><button class="btn g" id="mEnv">'+(wa?"Abrir WhatsApp y enviar":"Enviar email")+'</button><span class="sm mute">'+(wa?"A "+esc(tel(num||telD(l["Teléfono"]))):"A "+esc(to))+' · revísalo antes</span></div>';
       if(!wa)$("#mAs").value=r.asunto;$("#mTxt").value=r.texto;$("#mTxt").focus();

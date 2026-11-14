@@ -170,7 +170,7 @@ async function redactar(b){
   if (!tema) throw new Error("Escribe qué hay que enviar");
   const l = /^L-\d+$/.test(String(b.id || "")) ? (await leads()).find(x => x.ID === b.id) : null;
   if (l) await suyo(l.ID, b.quien);
-  const negocio = l ? l.Negocio : "", quien = b.quien && b.quien !== "Pau" ? b.quien : "Pau";
+  const negocio = l ? l.Negocio : "", quien = ["Pau", "Rayan", "Raffi"].includes(b.firma) ? b.firma : (b.quien || "Pau");
   let asunto = "", texto = "";
   if (E.ANTHROPIC_API_KEY){
     try {
