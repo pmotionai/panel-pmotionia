@@ -164,7 +164,7 @@ async function metricool(){
 
 /* ---------- Mensajes tras la llamada: WhatsApp y email ---------- */
 // El agente redacta con lo que Pau escribe («qué piden»); Pau lo revisa y lo envía. Con ANTHROPIC_API_KEY redacta Claude; sin ella, una plantilla.
-const FIRMA = "Pau · PmotionIA\nWhatsApp Business: 684 48 35 49\npmotionia.com";
+const FIRMA = q => q + " · PmotionIA\nWhatsApp Business: 684 48 35 49\npmotionia.com";
 async function redactar(b){
   const canal = b.canal === "email" ? "email" : "whatsapp", tema = String(b.tema || "").trim().slice(0, 600);
   if (!tema) throw new Error("Escribe qué hay que enviar");
@@ -188,7 +188,7 @@ async function redactar(b){
       : `Hola${negocio ? ", " + negocio : ""} 👋 Soy ${quien}, de PmotionIA. Gracias por atenderme. Te paso lo que hablamos: ${tema}.`;
     asunto = `PmotionIA · ${tema.charAt(0).toUpperCase() + tema.slice(1, 70)}`;
   }
-  if (canal === "email"){ texto = texto.replace(/\s+$/, "") + "\n\n" + FIRMA; return { asunto:asunto || "PmotionIA · lo que hablamos", texto, ia:!!E.ANTHROPIC_API_KEY }; }
+  if (canal === "email"){ texto = texto.replace(/\s+$/, "") + "\n\n" + FIRMA(quien); return { asunto:asunto || "PmotionIA · lo que hablamos", texto, ia:!!E.ANTHROPIC_API_KEY }; }
   return { texto, ia:!!E.ANTHROPIC_API_KEY };
 }
 async function email(b){
