@@ -578,6 +578,7 @@ function ganchoCorto(l){
   if(esInmo(l))return"«¿Los contactos que os llegan de noche o en fin de semana, quién los contesta?»";
   if(esGest(l))return"«¿Cuántas veces al día os preguntan lo mismo por WhatsApp?»";
   if(/fisio|osteo|podo/i.test((l.Tipo||"")+" "+l.Negocio))return"«Ayudamos a clínicas de fisioterapia a que sus pacientes no falten a la cita, con recordatorios por WhatsApp.»";
+  if(/reform|constru|instal|lampist|desatasc|fontaner|electricist|obras/i.test(l.Tipo||l.Negocio||""))return"«Monto sistemas para empresas de reformas: dejáis de estar al teléfono con los clientes y de llevar presupuestos y obras en Excel. ¿Sabes cuánto ganaste en tu última obra?»";
   return"«Te llamo por una cosa concreta de vuestro negocio, te robo un minuto.»";
 }
 /* Guion de venta por resultado: no suponemos su problema, contamos lo que consiguen y preguntamos cómo lo hacen hoy */
@@ -596,6 +597,10 @@ function sector(l){var t=(l.Tipo||"")+" "+l.Negocio;
     preg:["«¿Cómo os organizáis ahora para pedir la documentación a los clientes?»","«Y las consultas que llegan por WhatsApp o teléfono, ¿quién las atiende?»"],
     cons:[["Avisos automáticos","cada cliente recibe qué tiene que mandar y cuándo. **Dejáis de perder tiempo persiguiendo papeles.**"],["Asistente de WhatsApp","responde las preguntas de siempre al momento. **Horas libres cada semana para el equipo.**"],["CRM con avisos","cada cliente y cada trámite con su fecha. **Sin tiempo perdido repasando vencimientos.**"]],
     hora:"Mejor hora: 8:00–9:30. Evita del 10 al 20 de enero, abril, julio y octubre."};
+  // Reformas, construcción e instaladores (20/11/2026): guion propio, oferta en dos partes (clientes + gestión interna)
+  if(/reform|constru|instal|lampist|desatasc|fontaner|electricist|obras/i.test(l.Tipo||l.Negocio||""))return{k:"reformas",nom:"empresa de reformas",plural:"empresas de reformas",gente:"clientes",coste:"",numeros:"",promesa:"",resultado:"",preg:[],cons:[],
+    rescate:"¿sabes cuánto ganaste en tu última obra?",
+    hora:"Mejor hora: 8:00–9:00 o desde las 18:00 (de día están en obra). Desatascos: cualquier hora."};
   // Talleres mecánicos (07/11/2026): guion propio de Pau, solo él los llama (viernes 16:00)
   if(/taller|mec[aá]nic/i.test(l.Tipo||""))return{k:"taller",nom:"taller mecánico",plural:"talleres",gente:"clientes",coste:"",numeros:"",promesa:"",resultado:"",preg:[],cons:[],
     rescate:"¿cuántas veces al día te llaman para preguntar si el coche ya está?",
@@ -630,12 +635,13 @@ function generarGuion(l){
   antes.unshift("No te rechazan a ti: rechazan una oferta que les acabas de contar en 10 segundos. Un «no» no es un fracaso, es un paso más cerca del «sí» siguiente. Si cuelgan, pasas a la siguiente ficha sin darle vueltas.");
   antes.forEach(function(x){out.push("- "+x)});
   if(S.k=="taller")return out.concat(guionTaller(l,dias)).join("\n");
+  if(S.k=="reformas")return out.concat(guionReformas(l,dias)).join("\n");
   out.push("## Apertura");
   out.push("**Nunca digas «especialista en automatizaciones», «inteligencia artificial» ni nada parecido al presentarte: es lo que hace que cuelguen antes de escuchar. Di siempre esta, tal cual:**");
   if(tipoLlamada(l)=="seg"){
     out.push("**Volver a llamar (seguimiento):** ya hablasteis o le escribisteis y no ha contestado. Preséntate, recuérdaselo y ve directo a la reunión.");
-    if(S.k=="salud")out.push("> «Hola, què tal? Em dic **"+YO+"**, de PmotionIA. Et vaig trucar fa poc i no he rebut resposta. "+(email?"Us vaig enviar el correu que em vau demanar. ":wa?"Us vaig escriure per WhatsApp. ":"")+"El millor seria fer una reunió telemàtica de 15 minuts per veure el vostre cas. Et va millor el "+dias[0]+" o el "+dias[1]+"?»");
-    out.push((S.k=="salud"?"En castellano: ":"")+"«Hola, ¿qué tal? Me llamo **"+YO+"**, de PmotionIA. Te llamé hace poco y no he recibido contestación. "+(email?"Os envié el correo que me pedisteis. ":wa?"Os escribí por WhatsApp. ":"")+"Lo mejor sería hacer una reunión telemática de 15 minutos para ver vuestro caso. ¿Te va mejor el "+dias[0]+" o el "+dias[1]+"?»");
+    if(S.k=="salud")out.push("> «Hola, què tal? Em dic **"+YO+"**, de Mataró. Et vaig trucar fa poc i no he rebut resposta. "+(email?"Us vaig enviar el correu que em vau demanar. ":wa?"Us vaig escriure per WhatsApp. ":"")+"El millor seria fer una reunió telemàtica de 15 minuts per veure el vostre cas. Et va millor el "+dias[0]+" o el "+dias[1]+"?»");
+    out.push((S.k=="salud"?"En castellano: ":"")+"«Hola, ¿qué tal? Me llamo **"+YO+"**, de Mataró. Te llamé hace poco y no he recibido contestación. "+(email?"Os envié el correo que me pedisteis. ":wa?"Os escribí por WhatsApp. ":"")+"Lo mejor sería hacer una reunión telemática de 15 minutos para ver vuestro caso. ¿Te va mejor el "+dias[0]+" o el "+dias[1]+"?»");
     out.push("*(Si dice que sí: apunta día y hora en el CRM. Si prefiere que le expliques antes, sigue con las preguntas de abajo.)*");
   }else if(S.k=="salud"){
     out.push("> «Hola, què tal? Em dic **"+YO+"**. Truco en un mal moment?»");
@@ -644,7 +650,7 @@ function generarGuion(l){
     out.push("En castellano: «Hola, ¿qué tal? Me llamo **"+YO+"**. ¿Te pillo en mal momento?» *(espera)* «Mira, trabajo en el sector de la fisioterapia y os vengo a hacer una propuesta que creo que os iría súper bien. ¿Tienes un minuto?»");
     out.push("*(Si de verdad le va mal: «¿Cuándo te viene mejor?» y lo apuntas.)*");
   }else{
-  out.push("> «Buenos días, ¿hablo con **"+N+"**? Soy "+YO+", de PmotionIA. Ayudamos a "+S.plural+" a "+S.promesa+". "+(email?"Os envié el correo que me pedisteis, os llamo para comentarlo. ":wa?"Os escribí por WhatsApp hace unos días. ":"")+"Te llamo por una cosa concreta. ¿Te pillo en mal momento, prefieres que te llame luego?»");
+  out.push("> «Buenos días, ¿hablo con **"+N+"**? Soy "+YO+", de Mataró. Ayudo a "+S.plural+" a "+S.promesa+". "+(email?"Os envié el correo que me pedisteis, os llamo para comentarlo. ":wa?"Os escribí por WhatsApp hace unos días. ":"")+"Te llamo por una cosa concreta. ¿Te pillo en mal momento, prefieres que te llame luego?»");
   out.push("*(No pidas permiso con «¿tienes un minuto?»: invita a decir que no. Dale la opción de colgar y, por educación, casi siempre sigue hablando. Si de verdad le va mal: «¿Cuándo te viene mejor?» y lo apuntas.)*");
   }
   out.push("**Si aun así dice «no me interesa» muy rápido, sin dejarte explicar** (frase de rescate, una sola vez): «Lo entiendo, solo una cosa antes de colgar: "+S.rescate+"» Si contesta, sigues con las preguntas. Si insiste, lo dejas y apuntas el motivo.");
@@ -729,9 +735,63 @@ function guionTaller(l,dias){return[
   "- **«No tengo tiempo»** → «Por eso: lo montamos nosotros, a ti te pido 30 minutos.»",
   "- **«No me interesa»** → «Sin problema, gracias por el rato.» Apunta el motivo y quién lo dijo.",
   "## Reglas",
-  "- No digas «PmotionIA» al empezar (solo si te preguntan o en la reunión).",
+  "- Nunca digas «PmotionIA» ni hables como empresa («somos», «nuestra empresa»): eres "+YO+", de Mataró, en primera persona.",
   "- Nada de «IA», «agente», «automatización» ni «software»: di «avisos por WhatsApp» o «seguimiento».",
   "- Nunca mientas. Vende el resultado con SUS números."]}
+/* Guion de reformas (aprobado por Pau el 20/11/2026): sistemas a medida en dos partes, clientes y gestión interna. Sin precios (repo público). */
+function dueno(l){var t=String(l.Notas||""),m=t.match(/Dueñ[oa]s?: ([^(.]+)/)||t.match(/Contacto probable: ([^(.]+)/);if(!m)return null;return{nom:m[1].trim(),seguro:/Dueñ/.test(m[0])}}
+function guionReformas(l,dias){var N=l.Negocio,d=dueno(l),w=d?d.nom.split(/ y |,/)[0].trim().split(/\s+/):[],pila=w.length>=4?w.slice(0,w.length-2).join(" "):(w[0]||"");return[
+  "## 0 · Si te sale el filtro del móvil («Di tu nombre y el motivo de la llamada»)",
+  "Le sale escrito en la pantalla y decide si coge. Corto, claro y sin prisa:",
+  "> «Soy "+YO+", de Mataró. Llamo por los presupuestos y la gestión de vuestras obras. Es un minuto.»",
+  "Si no coge: márcalo «no contesta» y mándale un WhatsApp en 5 minutos: «Hola, soy "+YO+", te acabo de llamar. Monto sistemas para empresas de reformas: dejáis de estar al teléfono con los clientes y de llevar presupuestos y obras en Excel. ¿Te llamo mañana a las 8:30?»",
+  "## 1 · Apertura (5-10 s)",
+  d?"> «Buenos días, ¿hablo con **"+pila+"**?» *("+(d.seguro?"nombre confirmado del dueño o dueña":"probable: lo nombran en las reseñas; si no es él, «¿con quién hablo de presupuestos?»")+")*":"> «Buenos días, ¿hablo con **"+N+"**? … Soy **"+YO+"**. ¿Con quién hablo?» *(No sabemos el nombre del dueño: pregúntalo y apúntalo.)*",
+  "Si no es quien decide: «¿Me pasas con quien hace los presupuestos?» · Si no está o está en obra: «¿A qué hora le pillo mejor, y cómo se llama?»",
+  "**Si te preguntan «¿de parte de quién?» o «¿de qué se trata?»** → «De parte de "+YO+". Es por los presupuestos y la gestión de las obras: cómo quitaros horas de teléfono y de Excel. Es un minuto.»",
+  "**Si insisten «¿de qué empresa eres?, ¿qué vendes?»** → «Soy "+YO+", de aquí, de Mataró. Trabajo con gente de reformas: les monto un sistema a su medida para que no estén todo el día al teléfono ni con Excels. Por eso quería hablar con quien lleva los presupuestos.» *(Nunca digas PmotionIA ni hables como empresa («somos», «nuestra empresa»): habla en primera persona, «yo monto». Nunca mientas.)*",
+  "## 2 · El resultado primero (≈20 s)",
+  "> «"+(pila||"[Nombre]")+", monto sistemas para empresas de reformas para que **dejéis de estar al teléfono con los clientes todo el día** y **de llevar los presupuestos, las obras y los números en Excel**. Una pregunta: **¿sabes cuánto ganaste en tu última obra?**»",
+  "*(Casi nadie lo sabe sin abrir el Excel. Si dice que sí, pregunta: «¿Y cuánto tardas en sacarlo?»)*",
+  "## 3 · Pregunta cómo lo hacen hoy (que te lo cuente él)",
+  "- **Clientes:** «¿Cuántas llamadas y WhatsApps de clientes coges al día estando en obra?» · «¿Cuántos presupuestos haces a la semana, y cuántos acaban en obra?»",
+  "- **Gestión:** «¿Cómo lleváis los presupuestos: Excel, Word, a mano?» · «¿Y las horas de los trabajadores y las facturas de proveedores de cada obra?»",
+  "- **Lo que sueña:** «Si esto funcionara solo, sin que tuvieras que estar pendiente, ¿qué cambiaría para ti?»",
+  "*(No supongas su problema. Apunta sus palabras exactas.)*",
+  "## 4 · Devuélveselo con números (los SUYOS)",
+  "> «O sea, coges unas **[X] llamadas al día** y haces **[Y] presupuestos a la semana** de **[Z] horas** cada uno, y salen **[W]**. Y lo que ganas en cada obra lo sabes al final, si lo sabes. Son muchas horas a la semana que no son obra. ¿Lo ves así?»",
+  "Si no da la cifra, no la inventes: «¿Más o menos? ¿Cinco al día? ¿Diez?»",
+  "## 5 · Lo que monto (solo lo que te haya contado)",
+  "**Parte 1 · Clientes** (si te habló del teléfono o de presupuestos que no salen):",
+  "- El cliente **pide presupuesto desde la web, Google o WhatsApp** con tipo de obra, m², fotos y zona. **Te llega resumido al móvil.**",
+  "- **Las preguntas de siempre se contestan solas** («¿hacéis baños?», «¿cuándo podéis venir?»).",
+  "- **El cliente elige la hora de la visita** en tus huecos.",
+  "- **Si no contesta al presupuesto, se le recuerda solo** a los 3 y 7 días.",
+  "- **«¿Cómo va mi obra?»**: le llegan avisos del avance y deja de llamarte.",
+  "**Parte 2 · Gestión interna** (si te habló de Excels o de no saber cuánto gana):",
+  "- **Presupuestos en 5 minutos** con tus precios por partida, desde el móvil.",
+  "- **Presupuesto aceptado = obra creada.** **Ves lo que ganas en cada obra**: materiales, horas y extras frente a lo cobrado.",
+  "- **Trabajadores:** quién está en cada obra y sus horas, desde el móvil. **Proveedores:** pedidos y facturas de cada obra.",
+  "- **Un panel** con obras en marcha, presupuestos pendientes y beneficio del mes.",
+  "> «Lo monto yo, a tu medida, y se adapta a cómo trabajas tú. A ti te pido media hora. Lo normal es empezar por la parte que más te duele y ampliar después.»",
+  "## 6 · Cierre",
+  "> «Te lo enseño montado con **"+N+"** en 15 minutos. ¿Te va mejor el **"+dias[0]+"** o el **"+dias[1]+"**? ¿A primera hora o al acabar la jornada?»",
+  "Si acepta: pide **nombre, WhatsApp y correo**. «Si ese día no puedes, avísame un poco antes y lo movemos.»",
+  "## Si te dice…",
+  "- **«Estoy en obra / no tengo tiempo»** → «Justo por eso te llamo: lo monto yo, a ti te pido media hora. ¿Te llamo a las 18:00?»",
+  "- **«Cada obra es distinta, los presupuestos los hago yo»** → «Claro, y los seguirás haciendo tú. Lo que te quito es pasarlo a limpio: con tus precios por partida, en 5 minutos desde el móvil. Y te llega el cliente con fotos y medidas.»",
+  "- **«Ya lo llevo en Excel y me va bien»** → «Perfecto. ¿Y cuánto tardas en saber lo que has ganado en una obra? Eso es lo que te enseño en 15 minutos; si lo tuyo es mejor, te lo digo yo.»",
+  "- **«Trabajo por recomendación»** → «Mejor aún. ¿Y cuántas horas se te van atendiendo a esos clientes antes de saber si la obra sale?»",
+  "- **«Ya tengo web / programa»** → «¿Cuál? Va encima, sin cambiarlo.»",
+  "- **«Si es para vender algo, no me interesa»** → «Lo entiendo. Solo una pregunta y te dejo: ¿sabes cuánto ganaste en tu última obra?» Si contesta, sigues; si no, gracias y apuntas el motivo.",
+  "- **«¿Cuánto cuesta?»** → «Depende de lo que montemos; es a tu medida. Por eso prefiero enseñártelo en 15 minutos.» *(Nunca precio por teléfono.)*",
+  "- **«Mándame info»** → «Claro, ¿a qué WhatsApp? Pero en 15 minutos lo ves con tu empresa. ¿"+dias[0]+" o "+dias[1]+"?»",
+  "- **«No me interesa»** → «Sin problema, gracias por el rato.» Apunta el motivo.",
+  "## Reglas",
+  "- **Nunca digas «PmotionIA» ni «somos una empresa», «nuestra empresa», «nuestro equipo»**: les tira para atrás. Eres "+YO+", de Mataró, y hablas en primera persona («yo te lo monto»).",
+  "- Nada de «IA», «agente», «automatización» ni «software»: di «sistema», «aviso por WhatsApp», «presupuesto», «panel».",
+  "- Vende el resultado con SUS números; nunca mientas ni te hagas pasar por cliente.",
+  "- Apunta al acabar: quién cogió (nombre y cargo), llamadas al día, presupuestos a la semana y cuántos salen, y cómo lleva la gestión (Excel, papel, programa)."]}
 function guionOficial(){return GUION_BASE.split("## Anexo")[0].split(/\r?\n/).filter(function(r){return!/^>\s*(Versión|El guion antiguo)/.test(r)&&!/^# /.test(r)}).join("\n")}
 function md(t){var out=[],lista=false,tabla=false;
   t.split(/\r?\n/).forEach(function(r){var s=esc(r).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<i>$1</i>").replace(/`(.+?)`/g,"$1");
@@ -951,7 +1011,7 @@ function responder(q){var n=norm(q),m;
   if((m=n.match(/(?:abre|abrir|busca|buscar|ficha de|ensename)\s+(?:la ficha de\s+)?(.+)/))){var l=buscaLead(m[1]);if(!l)return di("No encuentro ningún negocio que se llame "+m[1]+".");abrir(l.ID,ORDEN_LISTA.length?ORDEN_LISTA:ORDEN_HOY);return di("Abro "+l.Negocio+". Está en "+estadoTxt(l.Estado).toLowerCase()+(l["Próxima acción"]?". Próxima acción: "+l["Próxima acción"]:"")+".")}
   if(/cuantas llamadas|cuantos me quedan|cuantas me quedan/.test(n)){var c=pendientes().length;return di("Te quedan "+c+" llamada"+(c==1?"":"s")+" pendiente"+(c==1?"":"s")+" y llevas "+hechasHoy().length+" hechas hoy.")}
   if(/tarea/.test(n)){var t=tareasHoy();return di(t.length?"Para hoy tienes: "+lista(t.slice(0,5).map(function(x){return x.texto}))+".":"No tienes tareas para hoy.")}
-  if(/guion|que le digo|como empiezo/.test(n)){var x=LEADS.find(function(z){return z.ID==SEL});if(!x)return di("Abre primero la ficha de un negocio y te leo cómo empezar.");return di("Empieza así: Buenos días, ¿hablo con "+x.Negocio+"? Soy Pau, de PmotionIA, de Mataró. Te llamo por una cosa concreta, te robo un minuto. Y después: "+ganchoCorto(x).replace(/[«»]/g,""))}
+  if(/guion|que le digo|como empiezo/.test(n)){var x=LEADS.find(function(z){return z.ID==SEL});if(!x)return di("Abre primero la ficha de un negocio y te leo cómo empezar.");return di("Empieza así: Buenos días, ¿hablo con "+x.Negocio+"? Soy Pau, de Mataró. Te llamo por una cosa concreta, te robo un minuto. Y después: "+ganchoCorto(x).replace(/[«»]/g,""))}
   if(/agenda|citas|calendario/.test(n)){var cal=AGENDA.filter(function(e){return e.inicio.slice(0,10)==HOY});return di(cal.length?"Hoy tienes "+lista(cal.map(function(e){return e.titulo+(e.todoElDia?"":" a las "+e.inicio.slice(11,16))}))+".":CONEX.calendar?"No tienes nada en el calendario hoy.":"Aún no tengo tu Google Calendar conectado.")}
   if(/correo|email|mail/.test(n))return di(CONEX.correo?(CORREOS.length?"Tienes "+CORREOS.length+" sin leer: "+lista(CORREOS.slice(0,3).map(function(c){return c.asunto+" de "+String(c.de).replace(/<.*>/,"").trim()}))+".":"No tienes correos sin leer."):"Todavía no tengo acceso a tu correo.");
   if(/redes|reel|tiktok|instagram|visualizaciones/.test(n)){var dd=REDES&&REDES.datos;if(!dd)return di("Aún no tengo estadísticas de redes guardadas.");var m=dd.reels.slice().sort(function(a,b){return(((b.ig&&b.ig.vis||0))+((b.tt&&b.tt.vis||0)))-(((a.ig&&a.ig.vis||0))+((a.tt&&a.tt.vis||0)))})[0];return di("En los últimos 30 días: "+fmt(dd.cuentas.tiktok.vis)+" visualizaciones en TikTok y "+fmt(dd.cuentas.instagram.vis)+" en Instagram. El que mejor va es «"+m.titulo+"».")}
